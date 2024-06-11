@@ -14,16 +14,6 @@ public class CreateBookRequest {
     public static class Author {
         private Long id;
 
-        public void setId(Long id) {
-            this.id = id;
-        }
     }
 
-    public void setBookTitle(String bookTitle) {
-        this.bookTitle = bookTitle;
-    }
-
-    public void setAuthor(Author author) {
-        this.author = author;
-    }
 }

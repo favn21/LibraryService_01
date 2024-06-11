@@ -11,8 +11,5 @@ public class Author {
     private String secondName;
     private String familyName;
 
-    public Author(Long id) {
-        this.id = id;
-    }
 }
 

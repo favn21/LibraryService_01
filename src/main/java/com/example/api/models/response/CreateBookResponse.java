@@ -15,9 +15,6 @@ public class CreateBookResponse {
     private String errorMessage;
     private String errorDetails;
 
-    public long getBookId() {
-        return bookId;
-    }
 }
 
 

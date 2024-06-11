@@ -12,8 +12,4 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class GetBooksByAuthorRequest {
     @XmlElement(name = "authorId")
     private Long authorId;
-
-    public void setAuthorId(Long authorId) {
-        this.authorId = authorId;
-    }
 }

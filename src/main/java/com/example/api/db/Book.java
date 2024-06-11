@@ -10,11 +10,4 @@ public class Book {
     private String bookTitle;
     private long authorId;
 
-    public long getId() {
-        return id;
-    }
-
-    public String getBookTitle() {
-        return bookTitle;
-    }
 }

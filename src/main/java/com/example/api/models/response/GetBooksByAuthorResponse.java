@@ -9,7 +9,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GetBooksByAuthorResponse {
     private List<BookDetail> books;
-    private String message;
     private Integer errorCode;
     private String errorMessage;
     private String errorDetails;
