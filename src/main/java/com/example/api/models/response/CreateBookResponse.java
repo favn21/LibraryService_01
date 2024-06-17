@@ -8,13 +8,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateBookResponse {
-
+public class CreateBookResponse implements BaseResponse{
     private long bookId;
-    private Integer errorCode;
+    private int errorCode;
     private String errorMessage;
     private String errorDetails;
-    private Integer httpStatusCode;
+    private int httpStatusCode;
 
 }
 

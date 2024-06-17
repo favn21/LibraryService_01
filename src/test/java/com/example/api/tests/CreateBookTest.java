@@ -21,50 +21,35 @@ public class CreateBookTest extends BaseTest {
     @DisplayName("Позитивный тест - Сохранение новой книги")
     @Description("Проверка, что книга успешно создается с валидными данными")
     public void testCreateBook() {
-        String title = "Детство";
-        Long authorId = 2L;
+        CreateBookResponse response = bookSteps.createBook("Детство", 2L);
 
-        CreateBookResponse response = bookSteps.createBook(title, authorId);
-
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 201);
-        BookAssertions.verifyCreateBookResponse(response);
+        BookAssertions.verifyCreateBookResponse(response, 201);
     }
     @Test
     @DisplayName("Негативный тест - Создание книги без указания названия")
     @Description("Проверка, что при попытке создать книгу без названия возвращается ошибка")
     public void testCreateBookWithoutTitle() {
-        Long authorId = 3L;
-        String title = null;
 
-        CreateBookResponse response = ErrorBookApiRequests.createBookWithError(authorId, title, 400);
+        CreateBookResponse response = ErrorBookApiRequests.createBookWithError(3L, null, 400);
 
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 400);
-        BookAssertions.verifyFailedCreateBookResponse(response,400, 1001,"Не передано наименование книги",null);
+        BookAssertions.verifyFailedResponse(response,400, 1001,"не передан обязательный параметр или не пройдена валидация",null);
     }
 
     @Test
     @DisplayName("Негативный тест - Создание книги с несуществующим автором")
     @Description("Проверка, что при попытке создать книгу с несуществующим автором возвращается ошибка")
     public void testCreateBookWithNonExistingAuthor() {
-        Long authorId = 999L;
-        String title = "Детство";
+        CreateBookResponse response = ErrorBookApiRequests.createBookWithError(999L, "Детство", 409);
 
-        CreateBookResponse response = ErrorBookApiRequests.createBookWithError(authorId, title, 409);
-
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 409);
-        BookAssertions.verifyFailedCreateBookResponse(response, 409, 1004, "Указанный автор не существует в таблице",null );
+        BookAssertions.verifyFailedResponse(response, 409, 1004, "Указанный автор не существует в таблице",null );
     }
 
     @Test
     @DisplayName("Негативный тест - Создание книги с ошибкой сохранения")
     @Description("Проверка, что при ошибке сохранения возвращается ошибка сервера")
     public void testCreateBookWithSavingError() {
-        Long authorId = 5L;
-        String title = "Детство";
+        CreateBookResponse response = ErrorBookApiRequests.createBookWithError(5L, "Детство", 500);
 
-        CreateBookResponse response = ErrorBookApiRequests.createBookWithError(authorId, title, 500);
-
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 500);
-        BookAssertions.verifyFailedCreateBookResponse(response, 500, 1003, "Ошибка сохранения данных",null);
+        BookAssertions.verifyFailedResponse(response, 500, 1003, "Ошибка сохранения данных",null);
     }
 }

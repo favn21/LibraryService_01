@@ -23,13 +23,11 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Позитивный тест - Получение книг по автору (JSON)")
     @Description("Проверка, что можно получить книги автора в формате JSON")
     public void testGetBooksByAuthorJSON() {
-        Long authorId = 2L;
         ContentType contentType = ContentType.JSON;
 
-        GetBooksByAuthorResponse response = bookSteps.getBooksByAuthor(authorId, contentType);
+        GetBooksByAuthorResponse response = bookSteps.getBooksByAuthor(2L, contentType);
 
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 201);
-        BookAssertions.verifyGetBooksByAuthorResponse(response);
+        BookAssertions.verifyGetBooksByAuthorResponse(response, 201);
     }
 
 
@@ -37,12 +35,10 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Позитивный тест - Получение книг по автору (XML)")
     @Description("Проверка, что можно получить книги автора в формате XML")
     public void testGetBooksByAuthorXML() {
-        Long authorId = 2L;
         ContentType contentType = ContentType.XML;
 
-        GetBooksByAuthorResponse response = bookSteps.getBooksByAuthor(authorId, contentType);
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 201);
-        BookAssertions.verifyGetBooksByAuthorResponse(response);
+        GetBooksByAuthorResponse response = bookSteps.getBooksByAuthor(2L, contentType);
+        BookAssertions.verifyGetBooksByAuthorResponse(response, 201);
     }
     @Test
     @DisplayName("Негативный тест - Получение книг по автору без указания ID")
@@ -50,29 +46,24 @@ public class GetBooksByAuthorTest extends BaseTest {
     public void testGetBooksByAuthorWithoutId() {
         GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(0L, 400);
 
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 400);
-        BookAssertions.verifyFailedGetBooksByAuthorResponse(response, 400, 1001, "Не передан id автора", null);
+        BookAssertions.verifyFailedResponse(response, 400, 1001, "не передан обязательный параметр или не пройдена валидация", null);
     }
 
     @Test
     @DisplayName("Негативный тест - Получение книг по автору с несуществующим ID")
     @Description("Проверка, что при запросе с несуществующим ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithNonexistentId() {
-        Long authorId = 999L;
-        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(authorId, 400);
+        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(999L, 400);
 
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 400);
-        BookAssertions.verifyFailedGetBooksByAuthorResponse(response, 400, 1004, "Указанный автор не существует в таблице", null);
+        BookAssertions.verifyFailedResponse(response, 400, 1004, "Указанный автор не существует в таблице", null);
     }
 
     @Test
     @DisplayName("Негативный тест - Получение книг по автору с ошибкой при получении данных")
     @Description("Проверка, что при ошибке получения данных возвращается ошибка сервера")
     public void testGetBooksByAuthorWithError() {
-        Long authorId = 2L;
-        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(authorId, 500);
+        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(2L, 500);
 
-        BookAssertions.verifyStatusCode(response.getHttpStatusCode(), 500);
-        BookAssertions.verifyFailedGetBooksByAuthorResponse(response, 500, 1005, "Ошибка получения данных",null);
+        BookAssertions.verifyFailedResponse(response, 500, 1005, "Ошибка получения данных",null);
     }
 }

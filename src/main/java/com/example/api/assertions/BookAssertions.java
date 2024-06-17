@@ -1,24 +1,25 @@
 package com.example.api.assertions;
 
 
+import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class BookAssertions {
 
-    public static void verifyCreateBookResponse(CreateBookResponse response) {
+    public static void verifyCreateBookResponse(CreateBookResponse response, int expectedHttpStatusCode) {
         assertNotNull(response);
         assertNotNull(response.getBookId());
+        assertEquals(expectedHttpStatusCode, response.getHttpStatusCode());
     }
 
-    public static void verifyGetBooksByAuthorResponse(GetBooksByAuthorResponse response) {
+    public static void verifyGetBooksByAuthorResponse(GetBooksByAuthorResponse response, int expectedHttpStatusCode) {
         assertNotNull(response);
         assertNotNull(response.getBooks());
+        assertEquals(expectedHttpStatusCode, response.getHttpStatusCode());
         for (GetBooksByAuthorResponse.BookDetail book : response.getBooks()) {
             assertNotNull(book.getId());
             assertNotNull(book.getBookTitle());
@@ -31,27 +32,15 @@ public class BookAssertions {
         assertNotNull(response.getBooks().get(0).getId());
         assertNotNull(response.getBooks().get(0).getBookTitle());
     }
-    public static void verifyFailedCreateBookResponse(CreateBookResponse response, int expectedStatusCode, int expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails)  {
+    public static void verifyFailedResponse(BaseResponse response, int expectedStatusCode, int expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
         assertNotNull(response);
-        assertNotNull(response.getErrorCode());
-        assertEquals(expectedErrorCode, response.getErrorCode());
         assertEquals(expectedStatusCode, response.getHttpStatusCode());
-        assertNotNull(response.getErrorMessage());
-        assertEquals(expectedErrorMessage, response.getErrorMessage());
-        assertNotNull(response.getErrorDetails());
-        assertEquals(expectedErrorDetails, response.getErrorDetails());
-    }
-    public static void verifyFailedGetBooksByAuthorResponse(GetBooksByAuthorResponse response, int expectedStatusCode, int expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails)  {
-        assertNotNull(response);
-        assertNotNull(response.getErrorCode());
         assertEquals(expectedErrorCode, response.getErrorCode());
-        assertEquals(expectedStatusCode, response.getHttpStatusCode());
-        assertNotNull(response.getErrorMessage());
         assertEquals(expectedErrorMessage, response.getErrorMessage());
-        assertNotNull(response.getErrorDetails());
-        assertEquals(expectedErrorDetails, response.getErrorDetails());
-    }
-    public static void verifyStatusCode(int actualStatusCode, int expectedStatusCode) {
-        assertEquals(expectedStatusCode, actualStatusCode);
+        if (expectedErrorDetails != null) {
+            assertEquals(expectedErrorDetails, response.getErrorDetails());
+        } else {
+            assertNull(response.getErrorDetails());
+        }
     }
 }
