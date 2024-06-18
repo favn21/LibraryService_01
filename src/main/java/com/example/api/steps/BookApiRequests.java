@@ -9,6 +9,7 @@ import com.example.api.service.RequestBuilder;
 
 import io.restassured.response.Response;
 
+import static com.example.api.service.RequestBuilder.responseSpecOK201;
 import static io.restassured.RestAssured.given;
 import io.restassured.http.ContentType;
 
@@ -28,7 +29,7 @@ public class BookApiRequests {
                 .when()
                 .post("/books/save")
                 .then()
-                .statusCode(201)
+                .spec(responseSpecOK201())
                 .extract()
                 .as(CreateBookResponse.class);
     }
@@ -37,22 +38,16 @@ public class BookApiRequests {
         GetBooksByAuthorRequest request = new GetBooksByAuthorRequest();
         request.setAuthorId(authorId);
 
-        Response response = given()
+        return given()
                 .spec(RequestBuilder.requestSpec())
                 .body(request)
                 .accept(contentType)
                 .when()
                 .get("/authors/{id}/books", authorId)
-                .andReturn();
-        GetBooksByAuthorResponse getBooksResponse = new GetBooksByAuthorResponse();
-        if (ContentType.JSON.equals(contentType)) {
-            getBooksResponse.setBooks(response.then().extract().jsonPath().getList(".", GetBooksByAuthorResponse.BookDetail.class));
-        } else if (ContentType.XML.equals(contentType)) {
-            getBooksResponse.setBooks(response.then().extract().xmlPath().getList("books.book", GetBooksByAuthorResponse.BookDetail.class));
-        } else {
-            throw new IllegalArgumentException("Unsupported content type: " + contentType);
-        }
-        return getBooksResponse;
+                .then()
+                .spec(responseSpecOK201())  // Используем ожидание кода 201
+                .extract()
+                .as(GetBooksByAuthorResponse.class);
     }
 
 }

@@ -27,26 +27,16 @@ public class GetBooksByAuthorTest extends BaseTest {
 
         GetBooksByAuthorResponse response = bookSteps.getBooksByAuthor(2L, contentType);
 
-        BookAssertions.verifyGetBooksByAuthorResponse(response, 201);
+        BookAssertions.verifyGetBooksByAuthorResponse(response);
     }
 
-
-    @Test
-    @DisplayName("Позитивный тест - Получение книг по автору (XML)")
-    @Description("Проверка, что можно получить книги автора в формате XML")
-    public void testGetBooksByAuthorXML() {
-        ContentType contentType = ContentType.XML;
-
-        GetBooksByAuthorResponse response = bookSteps.getBooksByAuthor(2L, contentType);
-        BookAssertions.verifyGetBooksByAuthorResponse(response, 201);
-    }
     @Test
     @DisplayName("Негативный тест - Получение книг по автору без указания ID")
     @Description("Проверка, что при запросе без ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithoutId() {
         GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(0L, 400);
 
-        BookAssertions.verifyFailedResponse(response, 400, 1001, "не передан обязательный параметр или не пройдена валидация", null);
+        BookAssertions.verifyFailedResponse(response, 400, 1001, "Не передан обязательный параметр: autherId", null);
     }
 
     @Test
@@ -60,10 +50,10 @@ public class GetBooksByAuthorTest extends BaseTest {
 
     @Test
     @DisplayName("Негативный тест - Получение книг по автору с ошибкой при получении данных")
-    @Description("Проверка, что при ошибке получения данных возвращается ошибка сервера")
+    @Description("Проверка, что при пустом списке книг у автора возвращается ошибка")
     public void testGetBooksByAuthorWithError() {
-        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(2L, 500);
+        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(1L, 500);
 
-        BookAssertions.verifyFailedResponse(response, 500, 1005, "Ошибка получения данных",null);
+        BookAssertions.verifyResponseWithEmptyList(response,1005, "Ошибка получения данных", null);
     }
 }

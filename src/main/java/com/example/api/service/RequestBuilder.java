@@ -24,7 +24,9 @@ public class RequestBuilder {
     }
 
     public static ResponseSpecification responseSpecOK201() {
-        return new ResponseSpecBuilder().expectStatusCode(201).build();
+        return new ResponseSpecBuilder()
+                .expectStatusCode(201)
+                .build();
     }
     public static ResponseSpecification responseSpecError(int statusCode) {
         return new ResponseSpecBuilder().expectStatusCode(statusCode).build();

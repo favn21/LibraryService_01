@@ -55,8 +55,9 @@ public class ErrorBookApiRequests {
                 .statusCode(expectedStatusCode)
                 .extract()
                 .as(GetBooksByAuthorResponse.class);
-        getBooksByAuthorResponse.setHttpStatusCode(expectedStatusCode);
+        getBooksByAuthorResponse.setHttpStatusCode(response.statusCode());
         return getBooksByAuthorResponse;
     }
+
 }
 

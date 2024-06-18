@@ -1,6 +1,5 @@
 package com.example.api.tests;
 
-
 import com.example.api.steps.BookApiRequests;
 import com.example.api.models.response.CreateBookResponse;
 import com.example.api.steps.ErrorBookApiRequests;
@@ -23,7 +22,7 @@ public class CreateBookTest extends BaseTest {
     public void testCreateBook() {
         CreateBookResponse response = bookSteps.createBook("Детство", 2L);
 
-        BookAssertions.verifyCreateBookResponse(response, 201);
+        BookAssertions.verifyCreateBookResponse(response);
     }
     @Test
     @DisplayName("Негативный тест - Создание книги без указания названия")
@@ -32,7 +31,7 @@ public class CreateBookTest extends BaseTest {
 
         CreateBookResponse response = ErrorBookApiRequests.createBookWithError(3L, null, 400);
 
-        BookAssertions.verifyFailedResponse(response,400, 1001,"не передан обязательный параметр или не пройдена валидация",null);
+        BookAssertions.verifyFailedResponse(response,400, 1001,"Не передан обязательный параметр: bookTitle",null);
     }
 
     @Test
