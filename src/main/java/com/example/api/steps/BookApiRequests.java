@@ -7,15 +7,14 @@ import com.example.api.models.request.GetBooksByAuthorRequest;
 import com.example.api.models.response.GetBooksByAuthorResponse;
 import com.example.api.service.RequestBuilder;
 
-import io.restassured.response.Response;
 
 import static com.example.api.service.RequestBuilder.responseSpecOK201;
 import static io.restassured.RestAssured.given;
 import io.restassured.http.ContentType;
 
-public class BookApiRequests {
 
-    public CreateBookResponse createBook(String title, Long authorId) {
+public class BookApiRequests {
+    public static CreateBookResponse createBook(String title, Long authorId) {
         CreateBookRequest request = new CreateBookRequest();
         request.setBookTitle(title);
         CreateBookRequest.Author author = new CreateBookRequest.Author();
@@ -34,7 +33,7 @@ public class BookApiRequests {
                 .as(CreateBookResponse.class);
     }
 
-    public GetBooksByAuthorResponse getBooksByAuthor(Long authorId, ContentType contentType) {
+    public static GetBooksByAuthorResponse getBooksByAuthor(Long authorId, ContentType contentType) {
         GetBooksByAuthorRequest request = new GetBooksByAuthorRequest();
         request.setAuthorId(authorId);
 
@@ -45,7 +44,7 @@ public class BookApiRequests {
                 .when()
                 .get("/authors/{id}/books", authorId)
                 .then()
-                .spec(responseSpecOK201())  // Используем ожидание кода 201
+                .spec(responseSpecOK201())
                 .extract()
                 .as(GetBooksByAuthorResponse.class);
     }

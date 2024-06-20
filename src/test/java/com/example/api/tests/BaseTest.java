@@ -5,7 +5,7 @@ import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 
 public abstract class BaseTest {
-
+    private static final int PORT = 8080;
     @BeforeAll
     public static void setup() {
         RestAssured.baseURI = getBaseURI();
@@ -13,6 +13,6 @@ public abstract class BaseTest {
     }
 
     protected static String getBaseURI() {
-        return "http://localhost:8080";
+        return "http://localhost:" + PORT;
     }
 }

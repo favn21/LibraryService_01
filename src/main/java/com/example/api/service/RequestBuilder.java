@@ -10,13 +10,21 @@ import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 public class RequestBuilder {
 
+    private static boolean filtersAdded = false;
+
     public static RequestSpecification requestSpec(String url) {
-        return new RequestSpecBuilder()
+        RequestSpecBuilder builder = new RequestSpecBuilder()
                 .setBaseUri(url)
-                .setContentType(ContentType.JSON)
-                .addFilter(new RequestLoggingFilter())
-                .addFilter(new ResponseLoggingFilter())
-                .build();
+                .setContentType(ContentType.JSON);
+
+
+        if (!filtersAdded) {
+            builder.addFilter(new RequestLoggingFilter());
+            builder.addFilter(new ResponseLoggingFilter());
+            filtersAdded = true;
+        }
+
+        return builder.build();
     }
 
     public static RequestSpecification requestSpec() {

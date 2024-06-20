@@ -5,35 +5,49 @@ import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class
 BookAssertions {
 
-    public static void verifyCreateBookResponse(CreateBookResponse response) {
+    public static void verifyCreateBookResponse(CreateBookResponse response,int expectedStatusCode) {
         assertNotNull(response);
         assertNotNull(response.getBookId());
-        assertEquals(201, response.getHttpStatusCode());
+        assertEquals(expectedStatusCode, response.getHttpStatusCode());
     }
 
-    public static void verifyGetBooksByAuthorResponse(GetBooksByAuthorResponse response) {
+    public static void verifyGetBooksByAuthorResponse(GetBooksByAuthorResponse response, int expectedStatusCode, int expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
         assertNotNull(response);
-        assertNotNull(response.getBooks());
-        assertEquals(201, response.getHttpStatusCode());
-        assertFalse(response.getBooks().isEmpty());
-        for (GetBooksByAuthorResponse.BookDetail book : response.getBooks()) {
+        assertEquals(expectedStatusCode, response.getHttpStatusCode());
+        if (expectedStatusCode != 201) {
+            assertEquals(expectedErrorCode, response.getErrorCode());
+            assertEquals(expectedErrorMessage, response.getErrorMessage());
+            assertEquals(expectedErrorDetails, response.getErrorDetails());
+        }
+
+        List<GetBooksByAuthorResponse.BookDetail> books = response.getBooks();
+        assertNotNull(books);
+
+        for (GetBooksByAuthorResponse.BookDetail book : books) {
             assertNotNull(book.getId());
             assertTrue(book.getId() > 0);
+
             assertNotNull(book.getBookTitle());
             assertFalse(book.getBookTitle().isEmpty());
+
             assertNotNull(book.getAuthor());
             assertNotNull(book.getAuthor().getId());
             assertTrue(book.getAuthor().getId() > 0);
+
             assertNotNull(book.getAuthor().getFirstName());
             assertFalse(book.getAuthor().getFirstName().isEmpty());
+
             assertNotNull(book.getAuthor().getSecondName());
             assertFalse(book.getAuthor().getSecondName().isEmpty());
+
             assertNotNull(book.getAuthor().getFamilyName());
             assertFalse(book.getAuthor().getFamilyName().isEmpty());
         }
@@ -51,11 +65,4 @@ BookAssertions {
         }
     }
 
-    public static void verifyResponseWithEmptyList(GetBooksByAuthorResponse response, int expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails){
-        assertNotNull(response);
-        assertEquals(expectedErrorCode, response.getHttpStatusCode());
-        assertEquals(expectedErrorMessage, response.getErrorMessage());
-        assertTrue(response.getBooks().isEmpty());
-        assertEquals(expectedErrorDetails, response.getErrorDetails());
-    }
 }
