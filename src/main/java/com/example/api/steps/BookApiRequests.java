@@ -1,20 +1,15 @@
 package com.example.api.steps;
 
-
 import com.example.api.models.request.CreateBookRequest;
-import com.example.api.models.response.CreateBookResponse;
 import com.example.api.models.request.GetBooksByAuthorRequest;
-import com.example.api.models.response.GetBooksByAuthorResponse;
 import com.example.api.service.RequestBuilder;
-
-
-import static com.example.api.service.RequestBuilder.responseSpecOK201;
-import static io.restassured.RestAssured.given;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 
+import static io.restassured.RestAssured.given;
 
 public class BookApiRequests {
-    public static CreateBookResponse createBook(String title, Long authorId) {
+    public static Response createBook(String title, Long authorId) {
         CreateBookRequest request = new CreateBookRequest();
         request.setBookTitle(title);
         CreateBookRequest.Author author = new CreateBookRequest.Author();
@@ -28,12 +23,11 @@ public class BookApiRequests {
                 .when()
                 .post("/books/save")
                 .then()
-                .spec(responseSpecOK201())
                 .extract()
-                .as(CreateBookResponse.class);
+                .response();
     }
 
-    public static GetBooksByAuthorResponse getBooksByAuthor(Long authorId, ContentType contentType) {
+    public static Response getBooksByAuthor(Long authorId, ContentType contentType) {
         GetBooksByAuthorRequest request = new GetBooksByAuthorRequest();
         request.setAuthorId(authorId);
 
@@ -44,9 +38,7 @@ public class BookApiRequests {
                 .when()
                 .get("/authors/{id}/books", authorId)
                 .then()
-                .spec(responseSpecOK201())
                 .extract()
-                .as(GetBooksByAuthorResponse.class);
+                .response();
     }
-
 }

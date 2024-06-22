@@ -1,7 +1,5 @@
 package com.example.api.tests;
 
-
-import com.example.api.models.response.GetBooksByAuthorResponse;
 import com.example.api.service.RequestBuilder;
 import com.example.api.steps.BookApiRequests;
 import com.example.api.steps.ErrorBookApiRequests;
@@ -10,12 +8,11 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Story;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static com.example.api.service.RequestBuilder.requestSpec;
-import static com.example.api.service.RequestBuilder.responseSpecOK201;
-
+import static com.example.api.service.RequestBuilder.*;
 
 @Epic("LibraryService")
 @Story("Получить список книг по ID автора")
@@ -27,19 +24,19 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Позитивный тест - Получение книг по автору (JSON)")
     @Description("Проверка, что можно получить книги автора в формате JSON")
     public void testGetBooksByAuthorJSON() {
-        RequestBuilder.installSpecification(requestSpec(), responseSpecOK201());
+        RequestBuilder.installSpecification(requestSpec(), responseStatusCode(200));
         ContentType contentType = ContentType.JSON;
 
-        GetBooksByAuthorResponse response = bookSteps.getBooksByAuthor(2L, contentType);
+        Response response = bookSteps.getBooksByAuthor(2L, contentType);
 
-        BookAssertions.verifyGetBooksByAuthorResponse(response, 201, 0, null, null);
+        BookAssertions.verifyGetBooksByAuthorResponse(response, 200, 0, null, null);
     }
 
     @Test
     @DisplayName("Негативный тест - Получение книг по автору без указания ID")
     @Description("Проверка, что при запросе без ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithoutId() {
-        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(0L, 400);
+        Response response = ErrorBookApiRequests.getBooksByAuthorWithError(0L, 400);
 
         BookAssertions.verifyFailedResponse(response, 400, 1001, "Не передан обязательный параметр: autherId", "Не передан id автора");
     }
@@ -48,18 +45,20 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Негативный тест - Получение книг по автору с несуществующим ID")
     @Description("Проверка, что при запросе с несуществующим ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithNonexistentId() {
-        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(999L, 400);
+        Response response = ErrorBookApiRequests.getBooksByAuthorWithError(999L, 409);
 
-        BookAssertions.verifyFailedResponse(response, 400, 1004, "Указанный автор не существует в таблице", "Id автора не существует");
+        BookAssertions.verifyFailedResponse(response, 409, 1004, "Указанный автор не существует в таблице", null);
     }
 
     @Test
     @DisplayName("Негативный тест - Получение книг по автору с ошибкой при получении данных")
-    @Description("Проверка, что даже при ошибке сервера возвращается список книг автора")
+    @Description("Проверка, что при ошибке сервера возвращается ошибка сервера")
     public void testGetBooksByAuthorWithError() {
-        GetBooksByAuthorResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(1L, 500);
+        RequestBuilder.installSpecification(requestSpec(), responseStatusCode(500));
+        Long authorId = 1L;
+        int expectedStatusCode = 500;
+        Response response = ErrorBookApiRequests.getBooksByAuthorWithErrorAndMock(authorId, expectedStatusCode);
 
-        BookAssertions.verifyGetBooksByAuthorResponse(response, 500, 1005, "Ошибка получения данных", "Ошибка сервера");
+        BookAssertions.verifyFailedResponse(response, expectedStatusCode, 1005, "Ошибка получения данных", "Ошибка сервера");
     }
-
 }

@@ -13,7 +13,7 @@ public class CreateBookResponse implements BaseResponse{
     private int errorCode;
     private String errorMessage;
     private String errorDetails;
-    private int httpStatusCode;
+
 
 }
 

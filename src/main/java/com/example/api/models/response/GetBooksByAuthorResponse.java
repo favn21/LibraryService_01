@@ -15,7 +15,7 @@ public class GetBooksByAuthorResponse implements BaseResponse {
     private int errorCode;
     private String errorMessage;
     private String errorDetails;
-    private int httpStatusCode;
+
 
     @Data
 

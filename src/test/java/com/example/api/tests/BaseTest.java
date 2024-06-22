@@ -9,7 +9,7 @@ public abstract class BaseTest {
     @BeforeAll
     public static void setup() {
         RestAssured.baseURI = getBaseURI();
-        RequestBuilder.installSpecification(RequestBuilder.requestSpec(), RequestBuilder.responseSpecOK201());
+
     }
 
     protected static String getBaseURI() {
