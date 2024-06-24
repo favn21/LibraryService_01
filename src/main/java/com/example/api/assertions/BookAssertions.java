@@ -4,7 +4,8 @@ import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse;
 import io.restassured.response.Response;
-
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,6 +18,8 @@ public class BookAssertions {
         CreateBookResponse createBookResponse = response.as(CreateBookResponse.class);
         assertNotNull(createBookResponse);
         assertNotNull(createBookResponse.getBookId());
+
+        assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
     }
 
     public static void verifyGetBooksByAuthorResponse(Response response, int expectedStatusCode, int expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
@@ -34,24 +37,24 @@ public class BookAssertions {
             assertNotNull(books);
 
             for (GetBooksByAuthorResponse.BookDetail book : books) {
-                assertNotNull(book.getId());
-                assertTrue(book.getId() > 0);
+                assertThat(book.getId(), is(notNullValue()));
+                assertThat(book.getId(), is(greaterThan(0L)));
 
-                assertNotNull(book.getBookTitle());
-                assertFalse(book.getBookTitle().isEmpty());
+                assertThat(book.getBookTitle(), is(notNullValue()));
+                assertThat(book.getBookTitle(), is(not(emptyString())));
 
-                assertNotNull(book.getAuthor());
-                assertNotNull(book.getAuthor().getId());
-                assertTrue(book.getAuthor().getId() > 0);
+                assertThat(book.getAuthor(), is(notNullValue()));
+                assertThat(book.getAuthor().getId(), is(notNullValue()));
+                assertThat(book.getAuthor().getId(), is(greaterThan(0L)));
 
-                assertNotNull(book.getAuthor().getFirstName());
-                assertFalse(book.getAuthor().getFirstName().isEmpty());
+                assertThat(book.getAuthor().getFirstName(), is(notNullValue()));
+                assertThat(book.getAuthor().getFirstName(), is(not(emptyString())));
 
-                assertNotNull(book.getAuthor().getSecondName());
-                assertFalse(book.getAuthor().getSecondName().isEmpty());
+                assertThat(book.getAuthor().getSecondName(), is(notNullValue()));
+                assertThat(book.getAuthor().getSecondName(), is(not(emptyString())));
 
-                assertNotNull(book.getAuthor().getFamilyName());
-                assertFalse(book.getAuthor().getFamilyName().isEmpty());
+                assertThat(book.getAuthor().getFamilyName(), is(notNullValue()));
+                assertThat(book.getAuthor().getFamilyName(), is(not(emptyString())));
             }
         }
     }

@@ -1,6 +1,6 @@
 package com.example.api.tests;
 
-import com.example.api.service.RequestBuilder;
+
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 

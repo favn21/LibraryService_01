@@ -1,5 +1,6 @@
 package com.example.api.tests;
 
+
 import com.example.api.service.RequestBuilder;
 import com.example.api.steps.BookApiRequests;
 import com.example.api.steps.ErrorBookApiRequests;
@@ -11,6 +12,8 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+
 
 import static com.example.api.service.RequestBuilder.*;
 
@@ -45,6 +48,7 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Негативный тест - Получение книг по автору с несуществующим ID")
     @Description("Проверка, что при запросе с несуществующим ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithNonexistentId() {
+        RequestBuilder.installSpecification(requestSpec(), responseStatusCode(409));
         Response response = ErrorBookApiRequests.getBooksByAuthorWithError(999L, 409);
 
         BookAssertions.verifyFailedResponse(response, 409, 1004, "Указанный автор не существует в таблице", null);

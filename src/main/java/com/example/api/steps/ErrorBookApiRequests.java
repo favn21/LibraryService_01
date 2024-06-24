@@ -9,6 +9,7 @@ import static io.restassured.RestAssured.given;
 import io.restassured.http.ContentType;
 
 public class ErrorBookApiRequests {
+
     public static Response createBookWithError(Long authorId, String title, int expectedStatusCode) {
         CreateBookRequest request = new CreateBookRequest();
         request.setBookTitle(title);
@@ -41,6 +42,7 @@ public class ErrorBookApiRequests {
                 .extract()
                 .response();
     }
+
     public static Response getBooksByAuthorWithErrorAndMock(Long authorId, int statusCode) {
         return given()
                 .pathParam("id", authorId)

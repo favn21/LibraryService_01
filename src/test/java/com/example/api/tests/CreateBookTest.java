@@ -1,5 +1,6 @@
 package com.example.api.tests;
 
+
 import com.example.api.service.RequestBuilder;
 import com.example.api.steps.BookApiRequests;
 import com.example.api.steps.ErrorBookApiRequests;
@@ -42,6 +43,7 @@ public class CreateBookTest extends BaseTest {
     @DisplayName("Негативный тест - Создание книги с несуществующим автором")
     @Description("Проверка, что при попытке создать книгу с несуществующим автором возвращается ошибка")
     public void testCreateBookWithNonExistingAuthor() {
+        RequestBuilder.installSpecification(requestSpec(), responseStatusCode(409));
         Response response = ErrorBookApiRequests.createBookWithError(999L, "Детство", 409);
 
         BookAssertions.verifyFailedResponse(response, 409, 1004, "Указанный автор не существует в таблице", null);
@@ -51,8 +53,13 @@ public class CreateBookTest extends BaseTest {
     @DisplayName("Негативный тест - Создание книги с ошибкой сохранения")
     @Description("Проверка, что при ошибке сохранения возвращается ошибка сервера")
     public void testCreateBookWithSavingError() {
-        Response response = ErrorBookApiRequests.createBookWithError(5L, "Детство", 500);
+        RequestBuilder.installSpecification(requestSpec(), responseStatusCode(500));
+        Long authorId = 5L;
+        String bookTitle = "Детство";
+        int expectedStatusCode = 500;
 
-        BookAssertions.verifyFailedResponse(response, 500, 1003, "Ошибка сохранения данных", "Ошибка сервера");
+        Response response = ErrorBookApiRequests.createBookWithError(authorId, bookTitle, expectedStatusCode);
+
+        BookAssertions.verifyFailedResponse(response, expectedStatusCode, 1003, "Ошибка сохранения данных", "Ошибка сервера");
     }
 }

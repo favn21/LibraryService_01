@@ -1,14 +1,16 @@
 package com.example.api.steps;
 
 import com.example.api.models.request.CreateBookRequest;
-import com.example.api.models.request.GetBooksByAuthorRequest;
+
 import com.example.api.service.RequestBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
+
 import static io.restassured.RestAssured.given;
 
 public class BookApiRequests {
+
     public static Response createBook(String title, Long authorId) {
         CreateBookRequest request = new CreateBookRequest();
         request.setBookTitle(title);
@@ -18,7 +20,7 @@ public class BookApiRequests {
 
         return given()
                 .spec(RequestBuilder.requestSpec())
-                .accept(ContentType.JSON)
+                .contentType(ContentType.JSON)
                 .body(request)
                 .when()
                 .post("/books/save")
@@ -28,15 +30,12 @@ public class BookApiRequests {
     }
 
     public static Response getBooksByAuthor(Long authorId, ContentType contentType) {
-        GetBooksByAuthorRequest request = new GetBooksByAuthorRequest();
-        request.setAuthorId(authorId);
-
         return given()
                 .spec(RequestBuilder.requestSpec())
-                .body(request)
                 .accept(contentType)
+                .pathParam("id", authorId)
                 .when()
-                .get("/authors/{id}/books", authorId)
+                .get("/authors/{id}/books")
                 .then()
                 .extract()
                 .response();
