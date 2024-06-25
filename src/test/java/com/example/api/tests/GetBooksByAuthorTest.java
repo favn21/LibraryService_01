@@ -39,6 +39,7 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Негативный тест - Получение книг по автору без указания ID")
     @Description("Проверка, что при запросе без ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithoutId() {
+        RequestBuilder.installSpecification(requestSpec(), responseStatusCode(400));
         Response response = ErrorBookApiRequests.getBooksByAuthorWithError(0L, 400);
 
         BookAssertions.verifyFailedResponse(response, 400, 1001, "Не передан обязательный параметр: autherId", "Не передан id автора");

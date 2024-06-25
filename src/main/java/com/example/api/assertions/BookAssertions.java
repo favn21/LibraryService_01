@@ -37,24 +37,14 @@ public class BookAssertions {
             assertNotNull(books);
 
             for (GetBooksByAuthorResponse.BookDetail book : books) {
-                assertThat(book.getId(), is(notNullValue()));
-                assertThat(book.getId(), is(greaterThan(0L)));
+                assertThat(book.getId(), allOf(notNullValue(), greaterThan(0L)));
+                assertThat(book.getBookTitle(), allOf(notNullValue(), not(emptyString())));
 
-                assertThat(book.getBookTitle(), is(notNullValue()));
-                assertThat(book.getBookTitle(), is(not(emptyString())));
-
-                assertThat(book.getAuthor(), is(notNullValue()));
-                assertThat(book.getAuthor().getId(), is(notNullValue()));
-                assertThat(book.getAuthor().getId(), is(greaterThan(0L)));
-
-                assertThat(book.getAuthor().getFirstName(), is(notNullValue()));
-                assertThat(book.getAuthor().getFirstName(), is(not(emptyString())));
-
-                assertThat(book.getAuthor().getSecondName(), is(notNullValue()));
-                assertThat(book.getAuthor().getSecondName(), is(not(emptyString())));
-
-                assertThat(book.getAuthor().getFamilyName(), is(notNullValue()));
-                assertThat(book.getAuthor().getFamilyName(), is(not(emptyString())));
+                assertThat(book.getAuthor(), notNullValue());
+                assertThat(book.getAuthor().getId(), allOf(notNullValue(), greaterThan(0L)));
+                assertThat(book.getAuthor().getFirstName(), allOf(notNullValue(), not(emptyString())));
+                assertThat(book.getAuthor().getSecondName(), allOf(notNullValue(), not(emptyString())));
+                assertThat(book.getAuthor().getFamilyName(), allOf(notNullValue(), not(emptyString())));
             }
         }
     }
@@ -64,8 +54,12 @@ public class BookAssertions {
 
         BaseResponse baseResponse = response.as(BaseResponse.class);
         assertNotNull(baseResponse);
+
+
         assertEquals(expectedErrorCode, baseResponse.getErrorCode());
+
         assertEquals(expectedErrorMessage, baseResponse.getErrorMessage());
+
         if (expectedErrorDetails != null) {
             assertEquals(expectedErrorDetails, baseResponse.getErrorDetails());
         } else {

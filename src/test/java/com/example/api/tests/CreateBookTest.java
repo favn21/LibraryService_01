@@ -34,6 +34,7 @@ public class CreateBookTest extends BaseTest {
     @DisplayName("Негативный тест - Создание книги без указания названия")
     @Description("Проверка, что при попытке создать книгу без названия возвращается ошибка")
     public void testCreateBookWithoutTitle() {
+        RequestBuilder.installSpecification(requestSpec(), responseStatusCode(400));
         Response response = ErrorBookApiRequests.createBookWithError(3L, null, 400);
 
         BookAssertions.verifyFailedResponse(response, 400, 1001, "Не передан обязательный параметр: bookTitle", "Не передано наименование книги");
