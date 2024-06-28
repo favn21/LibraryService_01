@@ -1,7 +1,12 @@
 package com.example.api.models.response;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
@@ -11,14 +16,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
         @JsonSubTypes.Type(value = GetBooksByAuthorResponse.class, name = "getBooksByAuthor"),
         @JsonSubTypes.Type(value = CreateBookResponse.class, name = "createBook")
 })
-public interface BaseResponse {
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    int getErrorCode();
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    String getErrorMessage();
-
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NONE)
-    String getErrorDetails();
+public abstract class BaseResponse {
+    private int errorCode;
+    private String errorMessage;
+    private String errorDetails;
 }
