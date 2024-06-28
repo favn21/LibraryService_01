@@ -9,9 +9,7 @@ import static io.restassured.RestAssured.given;
 
 public class BookApiRequests {
 
-
     public static Response createBook(String title, Long authorId) {
-
         CreateBookRequest request = new CreateBookRequest();
         request.setBookTitle(title);
         CreateBookRequest.Author author = new CreateBookRequest.Author();
@@ -30,7 +28,6 @@ public class BookApiRequests {
     }
 
     public static Response getBooksByAuthor(Long authorId, ContentType contentType) {
-
         return given()
                 .spec(RequestBuilder.requestSpec())
                 .accept(contentType)

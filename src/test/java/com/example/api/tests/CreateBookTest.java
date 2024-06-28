@@ -2,13 +2,13 @@ package com.example.api.tests;
 
 import com.example.api.steps.BookApiRequests;
 import com.example.api.steps.ErrorBookApiRequests;
+import com.example.api.assertions.BookAssertions;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Story;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.example.api.assertions.BookAssertions;
-import io.restassured.response.Response;
 
 import static com.example.api.service.RequestBuilder.*;
 
@@ -49,11 +49,18 @@ public class CreateBookTest extends BaseTest {
     @DisplayName("Негативный тест - Создание книги с ошибкой сохранения")
     @Description("Проверка, что при ошибке сохранения возвращается ошибка сервера")
     public void testCreateBookWithSavingError() {
-        installSpecification(requestSpec(), responseStatusCode(500));
         Long authorId = 5L;
         String bookTitle = "Детство";
         int expectedStatusCode = 500;
+
+        installSpecification(requestSpec(), responseStatusCode(expectedStatusCode));
+
         Response response = ErrorBookApiRequests.createBookWithErrorAndMock(authorId, bookTitle, expectedStatusCode);
-        BookAssertions.verifyFailedResponse(response, expectedStatusCode, 1003, "Ошибка сохранения данных", "Ошибка сервера");
+
+        int expectedErrorCode = 1003;
+        String expectedErrorMessage = "Ошибка сохранения данных";
+        String expectedErrorDetails = "Ошибка сервера";
+
+        BookAssertions.verifyFailedResponse(response, expectedStatusCode, expectedErrorCode, expectedErrorMessage, expectedErrorDetails);
     }
 }

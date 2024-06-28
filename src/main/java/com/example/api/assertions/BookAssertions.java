@@ -37,14 +37,15 @@ public class BookAssertions {
             assertNotNull(books);
 
             for (GetBooksByAuthorResponse.BookDetail book : books) {
-                assertThat(book.getId(), allOf(notNullValue(), greaterThan(0L)));
-                assertThat(book.getBookTitle(), allOf(notNullValue(), not(emptyString())));
-
-                assertThat(book.getAuthor(), notNullValue());
-                assertThat(book.getAuthor().getId(), allOf(notNullValue(), greaterThan(0L)));
-                assertThat(book.getAuthor().getFirstName(), allOf(notNullValue(), not(emptyString())));
-                assertThat(book.getAuthor().getSecondName(), allOf(notNullValue(), not(emptyString())));
-                assertThat(book.getAuthor().getFamilyName(), allOf(notNullValue(), not(emptyString())));
+                assertThat(book.getId(), greaterThan(0L));
+                assertThat(book.getBookTitle(), not(emptyString()));
+                assertThat(book.getAuthor(), allOf(
+                        notNullValue(),
+                        hasProperty("id", greaterThan(0L)),
+                        hasProperty("firstName", not(emptyString())),
+                        hasProperty("secondName", not(emptyString())),
+                        hasProperty("familyName", not(emptyString()))
+                ));
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.example.api.tests;
 
+
 import com.example.api.steps.BookApiRequests;
 import com.example.api.steps.ErrorBookApiRequests;
 import com.example.api.assertions.BookAssertions;
@@ -51,10 +52,18 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Негативный тест - Получение книг по автору с ошибкой при получении данных")
     @Description("Проверка, что при ошибке сервера возвращается ошибка сервера")
     public void testGetBooksByAuthorWithError() {
-        installSpecification(requestSpec(), responseStatusCode(500));
         Long authorId = 1L;
         int expectedStatusCode = 500;
+
+
+        installSpecification(requestSpec(), responseStatusCode(expectedStatusCode));
+
         Response response = ErrorBookApiRequests.getBooksByAuthorWithErrorAndMock(authorId, expectedStatusCode);
-        BookAssertions.verifyFailedResponse(response, expectedStatusCode, 1005, "Ошибка получения данных", "Ошибка сервера");
+
+        int expectedErrorCode = 1005;
+        String expectedErrorMessage = "Ошибка получения данных";
+        String expectedErrorDetails = "Ошибка сервера";
+
+        BookAssertions.verifyFailedResponse(response, expectedStatusCode, expectedErrorCode, expectedErrorMessage, expectedErrorDetails);
     }
 }
