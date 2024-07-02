@@ -1,19 +1,18 @@
 package com.example.api.models.response;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
-        property = "errorCode",
-        visible = true
-)
-public abstract class BaseResponse {
-    private int errorCode;
+@Data
+@NoArgsConstructor
+public class BaseResponse {
+    @JsonProperty("errorCode")
+    private String errorCode;
+
+    @JsonProperty("errorMessage")
     private String errorMessage;
+
+    @JsonProperty("errorDetails")
     private String errorDetails;
 }

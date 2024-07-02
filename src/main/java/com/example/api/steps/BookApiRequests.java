@@ -1,6 +1,8 @@
 package com.example.api.steps;
 
 import com.example.api.models.request.CreateBookRequest;
+import com.example.api.models.response.CreateBookResponse;
+import com.example.api.models.response.GetBooksByAuthorResponse;
 import com.example.api.service.RequestBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -9,14 +11,14 @@ import static io.restassured.RestAssured.given;
 
 public class BookApiRequests {
 
-    public static Response createBook(String title, Long authorId) {
+    public static CreateBookResponse createBook(String title, Long authorId) {
         CreateBookRequest request = new CreateBookRequest();
         request.setBookTitle(title);
         CreateBookRequest.Author author = new CreateBookRequest.Author();
         author.setId(authorId);
         request.setAuthor(author);
 
-        return given()
+        Response response = given()
                 .spec(RequestBuilder.requestSpec())
                 .contentType(ContentType.JSON)
                 .body(request)
@@ -25,9 +27,12 @@ public class BookApiRequests {
                 .then()
                 .extract()
                 .response();
+
+
+        return response.as(CreateBookResponse.class);
     }
 
-    public static Response getBooksByAuthor(Long authorId, ContentType contentType) {
+    public static GetBooksByAuthorResponse getBooksByAuthor(Long authorId, ContentType contentType, int statusCode) {
         return given()
                 .spec(RequestBuilder.requestSpec())
                 .accept(contentType)
@@ -35,7 +40,8 @@ public class BookApiRequests {
                 .when()
                 .get("/authors/{id}/books")
                 .then()
+                .statusCode(statusCode)
                 .extract()
-                .response();
+                .as(GetBooksByAuthorResponse.class);
     }
 }

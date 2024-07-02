@@ -8,15 +8,16 @@ import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 public class RequestBuilder {
 
     private static boolean filtersAdded = false;
 
-    public static RequestSpecification requestSpec(String url) {
+    public static RequestSpecification requestSpec(String baseUrl) {
         RequestSpecBuilder builder = new RequestSpecBuilder()
-                .setBaseUri(url)
+                .setBaseUri(baseUrl)
+                .setBasePath("/library")
                 .setContentType(ContentType.JSON);
-
 
         if (!filtersAdded) {
             builder.addFilter(new RequestLoggingFilter());
@@ -28,13 +29,12 @@ public class RequestBuilder {
     }
 
     public static RequestSpecification requestSpec() {
-        return requestSpec("http://localhost:8080/library");
+        return requestSpec("http://localhost:8080");
     }
 
     public static ResponseSpecification responseStatusCode(int statusCode) {
         return new ResponseSpecBuilder().expectStatusCode(statusCode).build();
     }
-
 
     public static void installSpecification(RequestSpecification request, ResponseSpecification response) {
         RestAssured.requestSpecification = request;

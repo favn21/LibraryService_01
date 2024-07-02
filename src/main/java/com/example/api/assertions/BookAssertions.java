@@ -12,20 +12,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BookAssertions {
 
-    public static void verifyCreateBookResponse(Response response, int expectedStatusCode) {
-        assertEquals(expectedStatusCode, response.getStatusCode());
-
-        CreateBookResponse createBookResponse = response.as(CreateBookResponse.class);
+    public static void verifyCreateBookResponse(CreateBookResponse createBookResponse, int expectedStatusCode) {
         assertNotNull(createBookResponse);
         assertNotNull(createBookResponse.getBookId());
-
         assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
     }
 
-    public static void verifyGetBooksByAuthorResponse(Response response, int expectedStatusCode, int expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
-        assertEquals(expectedStatusCode, response.getStatusCode());
-
-        GetBooksByAuthorResponse getBooksByAuthorResponse = response.as(GetBooksByAuthorResponse.class);
+    public static void verifyGetBooksByAuthorResponse(GetBooksByAuthorResponse getBooksByAuthorResponse, int expectedStatusCode, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
         assertNotNull(getBooksByAuthorResponse);
 
         if (expectedStatusCode != 200) {
@@ -35,30 +28,25 @@ public class BookAssertions {
         } else {
             List<GetBooksByAuthorResponse.BookDetail> books = getBooksByAuthorResponse.getBooks();
             assertNotNull(books);
+            assertEquals(1, books.size());
 
-            for (GetBooksByAuthorResponse.BookDetail book : books) {
-                assertThat(book.getId(), greaterThan(0L));
-                assertThat(book.getBookTitle(), not(emptyString()));
-                assertThat(book.getAuthor(), allOf(
-                        notNullValue(),
-                        hasProperty("id", greaterThan(0L)),
-                        hasProperty("firstName", not(emptyString())),
-                        hasProperty("secondName", not(emptyString())),
-                        hasProperty("familyName", not(emptyString()))
-                ));
-            }
+            GetBooksByAuthorResponse.BookDetail book = books.get(0);
+
+            assertThat(book.getId(), greaterThan(0L));
+            assertThat(book.getBookTitle(), equalTo("Детство"));
+
+            GetBooksByAuthorResponse.AuthorDetail author = book.getAuthor();
+            assertNotNull(author);
+            assertThat(author.getId(), equalTo(2L));
+            assertThat(author.getFirstName(), equalTo("Nikolay"));
+            assertThat(author.getSecondName(), equalTo("Vasilyevich"));
+            assertThat(author.getFamilyName(), equalTo("Gogol"));
         }
     }
 
-    public static void verifyFailedResponse(Response response, int expectedStatusCode, int expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
-        assertEquals(expectedStatusCode, response.getStatusCode());
-
-        BaseResponse baseResponse = response.as(BaseResponse.class);
+    public static void verifyFailedResponse(BaseResponse baseResponse, int expectedStatusCode, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
         assertNotNull(baseResponse);
-
-
         assertEquals(expectedErrorCode, baseResponse.getErrorCode());
-
         assertEquals(expectedErrorMessage, baseResponse.getErrorMessage());
 
         if (expectedErrorDetails != null) {
