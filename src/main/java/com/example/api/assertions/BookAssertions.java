@@ -4,48 +4,46 @@ import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse;
 import io.restassured.response.Response;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
 
 public class BookAssertions {
 
-    public static void verifyCreateBookResponse(CreateBookResponse createBookResponse, int expectedStatusCode) {
+    public static void verifyCreateBookResponse( CreateBookResponse createBookResponse) {
         assertNotNull(createBookResponse);
-        assertNotNull(createBookResponse.getBookId());
         assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
     }
 
-    public static void verifyGetBooksByAuthorResponse(GetBooksByAuthorResponse getBooksByAuthorResponse, int expectedStatusCode, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
+    public static void verifyGetBooksByAuthorResponse(Response response, GetBooksByAuthorResponse getBooksByAuthorResponse, int expectedStatusCode, List<GetBooksByAuthorResponse.BookDetail> expectedBooks) {
         assertNotNull(getBooksByAuthorResponse);
+        assertEquals(expectedStatusCode, response.getStatusCode());
+        List<GetBooksByAuthorResponse.BookDetail> books = getBooksByAuthorResponse.getBooks();
+        assertNotNull(books);
+        assertEquals(expectedBooks.size(), books.size());
 
-        if (expectedStatusCode != 200) {
-            assertEquals(expectedErrorCode, getBooksByAuthorResponse.getErrorCode());
-            assertEquals(expectedErrorMessage, getBooksByAuthorResponse.getErrorMessage());
-            assertEquals(expectedErrorDetails, getBooksByAuthorResponse.getErrorDetails());
-        } else {
-            List<GetBooksByAuthorResponse.BookDetail> books = getBooksByAuthorResponse.getBooks();
-            assertNotNull(books);
-            assertEquals(1, books.size());
+        for (int i = 0; i < books.size(); i++) {
+            GetBooksByAuthorResponse.BookDetail book = books.get(i);
+            GetBooksByAuthorResponse.BookDetail expectedBook = expectedBooks.get(i);
 
-            GetBooksByAuthorResponse.BookDetail book = books.get(0);
-
-            assertThat(book.getId(), greaterThan(0L));
-            assertThat(book.getBookTitle(), equalTo("Детство"));
-
-            GetBooksByAuthorResponse.AuthorDetail author = book.getAuthor();
-            assertNotNull(author);
-            assertThat(author.getId(), equalTo(2L));
-            assertThat(author.getFirstName(), equalTo("Nikolay"));
-            assertThat(author.getSecondName(), equalTo("Vasilyevich"));
-            assertThat(author.getFamilyName(), equalTo("Gogol"));
+            assertThat(book.getId(), is(expectedBook.getId()));
+            assertThat(book.getBookTitle(), is(expectedBook.getBookTitle()));
+            assertThat(book.getAuthor(), allOf(
+                    notNullValue(),
+                    hasProperty("id", is(expectedBook.getAuthor().getId())),
+                    hasProperty("firstName", is(expectedBook.getAuthor().getFirstName())),
+                    hasProperty("secondName", is(expectedBook.getAuthor().getSecondName())),
+                    hasProperty("familyName", is(expectedBook.getAuthor().getFamilyName()))
+            ));
         }
     }
 
-    public static void verifyFailedResponse(BaseResponse baseResponse, int expectedStatusCode, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
+    public static void verifyFailedResponse(Response response, BaseResponse baseResponse, int expectedStatusCode, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
         assertNotNull(baseResponse);
+        assertEquals(expectedStatusCode, response.getStatusCode());
         assertEquals(expectedErrorCode, baseResponse.getErrorCode());
         assertEquals(expectedErrorMessage, baseResponse.getErrorMessage());
 
