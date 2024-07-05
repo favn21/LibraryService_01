@@ -2,8 +2,7 @@ package com.example.api.assertions;
 
 import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
-import com.example.api.models.response.GetBooksByAuthorResponse;
-import io.restassured.response.Response;
+import com.example.api.models.response.GetBooksByAuthorResponse.BookDetail;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -18,20 +17,18 @@ public class BookAssertions {
         assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
     }
 
-    public static void verifyGetBooksByAuthorResponse(Response response, GetBooksByAuthorResponse getBooksByAuthorResponse, int expectedStatusCode, List<GetBooksByAuthorResponse.BookDetail> expectedBooks) {
-        assertNotNull(getBooksByAuthorResponse);
-        assertEquals(expectedStatusCode, response.getStatusCode());
-        List<GetBooksByAuthorResponse.BookDetail> books = getBooksByAuthorResponse.getBooks();
-        assertNotNull(books);
-        assertEquals(expectedBooks.size(), books.size());
+    public static void verifyGetBooksByAuthorResponse(List<BookDetail> actualBooks, List<BookDetail> expectedBooks) {
+        assertNotNull(actualBooks);
+        assertEquals(expectedBooks.size(), actualBooks.size());
 
-        for (int i = 0; i < books.size(); i++) {
-            GetBooksByAuthorResponse.BookDetail book = books.get(i);
-            GetBooksByAuthorResponse.BookDetail expectedBook = expectedBooks.get(i);
 
-            assertThat(book.getId(), is(expectedBook.getId()));
-            assertThat(book.getBookTitle(), is(expectedBook.getBookTitle()));
-            assertThat(book.getAuthor(), allOf(
+        for (int i = 0; i < actualBooks.size(); i++) {
+            BookDetail actualBook = actualBooks.get(i);
+            BookDetail expectedBook = expectedBooks.get(i);
+
+            assertThat(actualBook.getId(), is(expectedBook.getId()));
+            assertThat(actualBook.getBookTitle(), is(expectedBook.getBookTitle()));
+            assertThat(actualBook.getAuthor(), allOf(
                     notNullValue(),
                     hasProperty("id", is(expectedBook.getAuthor().getId())),
                     hasProperty("firstName", is(expectedBook.getAuthor().getFirstName())),
@@ -41,9 +38,8 @@ public class BookAssertions {
         }
     }
 
-    public static void verifyFailedResponse(Response response, BaseResponse baseResponse, int expectedStatusCode, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
+    public static void verifyFailedResponse( BaseResponse baseResponse, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
         assertNotNull(baseResponse);
-        assertEquals(expectedStatusCode, response.getStatusCode());
         assertEquals(expectedErrorCode, baseResponse.getErrorCode());
         assertEquals(expectedErrorMessage, baseResponse.getErrorMessage());
 

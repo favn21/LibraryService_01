@@ -3,16 +3,13 @@ package com.example.api.steps;
 import com.example.api.models.request.CreateBookRequest;
 import com.example.api.models.response.CreateBookResponse;
 import com.example.api.service.RequestBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
+
 import com.example.api.models.response.GetBooksByAuthorResponse.BookDetail;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
 
 public class BookApiRequests {
-
-    private static final String basePath = "/books";
 
     public CreateBookResponse createBook(String title, Long authorId, int expectedStatusCode) {
         CreateBookRequest request = new CreateBookRequest();
@@ -22,28 +19,26 @@ public class BookApiRequests {
         request.setAuthor(author);
 
         return given()
-                .spec(RequestBuilder.requestSpec())
-                .basePath(basePath)
+                .spec(RequestBuilder.requestSpecCreateBook(request))
                 .body(request)
                 .when()
-                .post("/save")
+                .post()
                 .then()
                 .statusCode(expectedStatusCode)
                 .extract()
                 .as(CreateBookResponse.class);
     }
 
-    public static Response getBooksByAuthor(Long authorId, int statusCode) {
-        Response response = given()
-                .spec(RequestBuilder.requestSpec())
-                .pathParam("id", authorId)
+    public static List<BookDetail> getBooksByAuthor(Long authorId, int statusCode) {
+        return given()
+                .spec(RequestBuilder.requestSpecGetBooksByAuthor(authorId))
                 .when()
-                .get("/authors/{id}"+basePath)
+                .get()
                 .then()
                 .statusCode(statusCode)
                 .extract()
-                .response();
+                .jsonPath()
+                .getList(".", BookDetail.class);
 
-        return response;
     }
 }
