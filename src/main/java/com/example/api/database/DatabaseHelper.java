@@ -1,0 +1,63 @@
+package com.example.api.database;
+import com.example.api.config.LibraryDatabaseConfiguration;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+
+import java.util.List;
+
+public class DatabaseHelper {
+    private static Session getSession() {
+        return LibraryDatabaseConfiguration.getSession();
+    }
+
+    public static void clearTable(String tableName) {
+        Transaction transaction = null;
+        try (Session session = getSession()) {
+            transaction = session.beginTransaction();
+            session.createNativeQuery("DELETE FROM " + tableName).executeUpdate();
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
+    }
+
+    public static <T> List<T> getAllRecords(Class<T> entityClass) {
+        try (Session session = getSession()) {
+            Query<T> query = session.createQuery("FROM " + entityClass.getSimpleName(), entityClass);
+            return query.getResultList();
+        }
+    }
+
+    public static <T> List<T> getRecordsByField(Class<T> entityClass, String fieldName, Object value) {
+        try (Session session = getSession()) {
+            Query<T> query = session.createQuery("FROM " + entityClass.getSimpleName() + " WHERE " + fieldName + " = :value", entityClass);
+            query.setParameter("value", value);
+            return query.getResultList();
+        }
+    }
+
+    public static <T> T getRecordByField(Class<T> entityClass, String fieldName, Object value) {
+        try (Session session = getSession()) {
+            Query<T> query = session.createQuery("FROM " + entityClass.getSimpleName() + " WHERE " + fieldName + " = :value", entityClass);
+            query.setParameter("value", value);
+            return query.uniqueResult();
+        }
+    }
+
+    public static void deleteRecordById(Class<?> entityClass, Long id) {
+        Transaction transaction = null;
+        try (Session session = getSession()) {
+            transaction = session.beginTransaction();
+            Object persistentInstance = session.load(entityClass, id);
+            if (persistentInstance != null) {
+                session.delete(persistentInstance);
+                transaction.commit();
+            }
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback();
+            throw e;
+        }
+    }
+}
