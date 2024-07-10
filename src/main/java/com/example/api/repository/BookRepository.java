@@ -1,59 +1,87 @@
 package com.example.api.repository;
 
-import com.example.api.config.LibraryDatabaseConfiguration;
-import com.example.api.config.TransactionHelper;
-import com.example.api.db.Book;
-import org.hibernate.Session;
 
+import com.example.api.db.Book;
 
 import java.util.List;
 
 
-public class BookRepository {
-    private final Session session;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
-    public BookRepository() {
-        this.session = LibraryDatabaseConfiguration.getSession();
+
+import javax.persistence.EntityTransaction;
+
+
+public class BookRepository {
+
+    private final EntityManager entityManager;
+
+    public BookRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     public List<Book> findAll() {
-        final String hql = """
-           SELECT b FROM Book b
-           """;
-
-        return session.createQuery(hql, Book.class)
+        return entityManager.createQuery("SELECT b FROM Book b", Book.class)
                 .getResultList();
     }
 
-    public void deleteAll() {
-        final String sql = """
-           DELETE FROM book
-           """;
-
-        TransactionHelper.executeUpdate(session, sql);
-    }
 
     public void insertBook(String bookTitle, long authorId) {
-        final String sql = """
-           INSERT INTO book
-           (book_title, author_id)
-           VALUES(:bookTitle, :authorId)
-           """;
 
-        TransactionHelper.executeUpdateWithParams(session, sql, "bookTitle", bookTitle, "authorId", authorId);
+        Book author = entityManager.find(Book.class, authorId);
+        if (author == null) {
+            throw new IllegalArgumentException("Author with id " + authorId + " does not exist.");
+        }
+
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+
+            Query query = entityManager.createNativeQuery("INSERT INTO book (book_title, author_id) VALUES(:bookTitle, :authorId)");
+            query.setParameter("bookTitle", bookTitle);
+            query.setParameter("authorId", authorId);
+            int rowsAffected = query.executeUpdate();
+
+            transaction.commit();
+
+            if (rowsAffected == 0) {
+                throw new RuntimeException("Failed to insert book: no rows affected.");
+            }
+        } catch (RuntimeException e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Failed to insert book.", e);
+        }
     }
+
     public Book findBookByTitle(String bookTitle) {
-        final String hql = """
-           SELECT b FROM Book b WHERE b.bookTitle = :bookTitle
-           """;
-        return session.createQuery(hql, Book.class)
+        return entityManager.createQuery("SELECT b FROM Book b WHERE b.bookTitle = :bookTitle", Book.class)
                 .setParameter("bookTitle", bookTitle)
-                .uniqueResult();
+                .getSingleResult();
     }
+
     public void deleteBook(long bookId) {
-        final String sql = """
-           DELETE FROM book WHERE id = :bookId
-           """;
-        TransactionHelper.executeDeleteWithParams(session, sql, "bookId", bookId);
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+
+            Query query = entityManager.createQuery("DELETE FROM Book b WHERE b.id = :bookId");
+            query.setParameter("bookId", bookId);
+            query.executeUpdate();
+
+            transaction.commit();
+        } catch (RuntimeException e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
 }
