@@ -15,7 +15,7 @@ public class BookRepositoryTest extends BaseTestDB {
     public void testBookRepository() {
 
         bookRepository.insertBook("Книга 1", 1L);
-        bookRepository.insertBook("Книга 2", 2L);
+        bookRepository.insertBook("Книга 2", 1L);
 
         List<Book> allBooks = bookRepository.findAll();
         BookAssertions.bookListSize(2, allBooks);
@@ -23,7 +23,7 @@ public class BookRepositoryTest extends BaseTestDB {
         Book bookByTitle = bookRepository.findBookByTitle("Книга 1");
         BookAssertions.bookNotNull("Запись с названием 'Книга 1' не найдена", bookByTitle);
 
-        bookRepository.deleteBook(bookByTitle.getId());
+        bookRepository.deleteBook(2);
 
         List<Book> remainingBooks = bookRepository.findAll();
         BookAssertions.bookListSize(1, remainingBooks);
