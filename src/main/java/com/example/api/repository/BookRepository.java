@@ -72,7 +72,7 @@ public class BookRepository {
             transaction.begin();
 
             Query query = entityManager.createQuery("DELETE FROM Book b WHERE b.id = :bookId");
-            query.setParameter("book_Id", bookId);
+            query.setParameter("bookId", bookId);
             query.executeUpdate();
 
             transaction.commit();
