@@ -35,6 +35,8 @@ public class BaseTestDB {
     public void setUp() {
         entityManager = entityManagerFactory.createEntityManager();
         bookRepository = new BookRepository(entityManager);
+        bookRepository.clearBooks();
+
     }
 
     @AfterEach

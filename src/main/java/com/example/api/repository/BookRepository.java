@@ -66,15 +66,29 @@ public class BookRepository {
     }
 
 
-    public void deleteBook(long bookId) {
+    public void deleteBook(String bookTitle) {
         EntityTransaction transaction = entityManager.getTransaction();
         try {
             transaction.begin();
 
-            Query query = entityManager.createQuery("DELETE FROM Book b WHERE b.id = :bookId");
-            query.setParameter("bookId", bookId);
+            Query query = entityManager.createQuery("DELETE FROM Book b WHERE b.bookTitle = :bookTitle");
+            query.setParameter("bookTitle", bookTitle);
             query.executeUpdate();
 
+            transaction.commit();
+        } catch (RuntimeException e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
+    }
+    public void clearBooks() {
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+            Query query = entityManager.createQuery("DELETE FROM Book");
+            query.executeUpdate();
             transaction.commit();
         } catch (RuntimeException e) {
             if (transaction.isActive()) {

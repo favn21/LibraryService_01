@@ -23,10 +23,12 @@ public class BookRepositoryTest extends BaseTestDB {
         Book bookByTitle = bookRepository.findBookByTitle("Книга 1");
         BookAssertions.bookNotNull("Запись с названием 'Книга 1' не найдена", bookByTitle);
 
-        bookRepository.deleteBook(2);
+        bookRepository.deleteBook("Книга 2");
 
         List<Book> remainingBooks = bookRepository.findAll();
         BookAssertions.bookListSize(1, remainingBooks);
+        bookRepository.clearBooks();
+
 
     }
 }
