@@ -6,6 +6,9 @@ import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse.BookDetail;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,6 +17,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class BookAssertions {
+    private static EntityManager entityManager;
+
+    public BookAssertions(EntityManager entityManager) {
+        BookAssertions.entityManager = entityManager;
+    }
 
     public static void verifyCreateBookResponse( CreateBookResponse createBookResponse) {
         assertNotNull(createBookResponse);
@@ -68,19 +76,40 @@ public class BookAssertions {
     }
 
     public static void verifyBookInDatabase(Long bookId, String expectedTitle, Long expectedAuthorId) {
-        Book bookInDb = DatabaseHelper.getRecordByField(Book.class, "id", bookId);
-        assertNotNull(bookInDb, "Книга должна быть сохранена в базе данных");
-        assertEquals(expectedTitle, bookInDb.getBookTitle(), "Название книги должно совпадать");
-        assertEquals(expectedAuthorId, bookInDb.getAuthor_id(), "ID автора должен совпадать");
+        TypedQuery<Book> query = entityManager.createQuery("SELECT b FROM Book b WHERE b.id = :bookId", Book.class);
+        query.setParameter("bookId", bookId);
+        Book book = query.getSingleResult();
+
+        if (book == null) {
+            throw new AssertionError("Book with ID " + bookId + " does not exist in the database.");
+        }
+        if (!book.getBookTitle().equals(expectedTitle)) {
+            throw new AssertionError("Expected title to be " + expectedTitle + " but was " + book.getBookTitle());
+        }
+        if (!book.getAuthor_id().equals(expectedAuthorId)) {
+            throw new AssertionError("Expected author ID to be " + expectedAuthorId + " but was " + book.getAuthor_id());
+        }
     }
 
     public static void verifyBookNotInDatabase(Long bookId) {
-        Book bookInDb = DatabaseHelper.getRecordByField(Book.class, "id", bookId);
-        assertNull(bookInDb, "Книга не должна быть в базе данных");
+        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.id = :bookId", Long.class);
+        query.setParameter("bookId", bookId);
+        Long count = query.getSingleResult();
+
+        if (count > 0) {
+            throw new AssertionError("Book with ID " + bookId + " exists in the database, but it should not.");
+        }
     }
+
+
     public static void verifyNoBooksInDatabaseWithAuthorId(Long authorId) {
-        List<Book> booksInDb = DatabaseHelper.getRecordsByField(Book.class, "authorId", authorId);
-        assertTrue(booksInDb.isEmpty(), "В базе данных не должно быть книг с указанным authorId");
+        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.authorId = :authorId", Long.class);
+        query.setParameter("authorId", authorId);
+        Long count = query.getSingleResult();
+
+        if (count > 0) {
+            throw new AssertionError("Books with author ID " + authorId + " exist in the database, but they should not.");
+        }
     }
 
 }

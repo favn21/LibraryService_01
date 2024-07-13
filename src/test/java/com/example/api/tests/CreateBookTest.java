@@ -35,8 +35,8 @@ public class CreateBookTest extends BaseTest {
     @Description("Проверка, что при попытке создать книгу без названия возвращается ошибка")
     public void testCreateBookWithoutTitle() {
         installSpecification(requestSpec(), responseStatusCode(400));
-        BaseResponse  response = ErrorBookApiRequests.createBookWithError(3L, null, 400);
-        BookAssertions.verifyFailedResponse( response,  "1001", "Не передан обязательный параметр: bookTitle", "Не передано наименование книги");
+        BaseResponse response = ErrorBookApiRequests.createBookWithError(3L, null, 400);
+        BookAssertions.verifyFailedResponse(response, "1001", "Не передан обязательный параметр: bookTitle", "Не передано наименование книги");
         BookAssertions.verifyBookNotInDatabase(3L);
     }
 
@@ -45,8 +45,8 @@ public class CreateBookTest extends BaseTest {
     @Description("Проверка, что при попытке создать книгу с несуществующим автором возвращается ошибка")
     public void testCreateBookWithNonExistingAuthor() {
         installSpecification(requestSpec(), responseStatusCode(409));
-        BaseResponse  response = ErrorBookApiRequests.createBookWithError(999L, "Детство", 409);
-        BookAssertions.verifyFailedResponse(response,  "1004", "Указанный автор не существует в таблице", null);
+        BaseResponse response = ErrorBookApiRequests.createBookWithError(999L, "Детство", 409);
+        BookAssertions.verifyFailedResponse(response, "1004", "Указанный автор не существует в таблице", null);
         BookAssertions.verifyBookNotInDatabase(999L);
     }
 
@@ -55,8 +55,8 @@ public class CreateBookTest extends BaseTest {
     @Description("Проверка, что при попытке сохранить книгу, которая уже существует, возвращается ошибка конфликта")
     public void testCreateBookWithSavingError() {
         installSpecification(requestSpec(), responseStatusCode(500));
-        BaseResponse  response = ErrorBookApiRequests.createBookWithErrorAndMock(2L, "Детство", 500);
-        BookAssertions.verifyFailedResponse(response,  "1003", "Книга уже существует в библиотеке", null);
+        BaseResponse response = ErrorBookApiRequests.createBookWithErrorAndMock(2L, "Детство", 500);
+        BookAssertions.verifyFailedResponse(response, "1003", "Книга уже существует в библиотеке", null);
 
         List<Book> booksInDb = DatabaseHelper.getRecordsByField(Book.class, "bookTitle", "Детство");
         BookAssertions.bookListSize(1, booksInDb);

@@ -26,7 +26,7 @@ public class Book implements Serializable {
     private LocalDateTime updated;
 
     @Column(name = "author_id")
-    private long author_id;
+    private Long author_id;
 
 
 

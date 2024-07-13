@@ -1,59 +1,101 @@
 package com.example.api.repository;
 
-import com.example.api.config.LibraryDatabaseConfiguration;
-import com.example.api.config.TransactionHelper;
-import com.example.api.db.Book;
-import org.hibernate.Session;
 
+import com.example.api.db.Author;
+import com.example.api.db.Book;
 
 import java.util.List;
 
 
-public class BookRepository {
-    private final Session session;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 
-    public BookRepository() {
-        this.session = LibraryDatabaseConfiguration.getSession();
+
+import javax.persistence.EntityTransaction;
+
+
+public class BookRepository {
+
+    private final EntityManager entityManager;
+
+    public BookRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     public List<Book> findAll() {
-        final String hql = """
-           SELECT b FROM Book b
-           """;
-
-        return session.createQuery(hql, Book.class)
+        return entityManager.createQuery("SELECT b FROM Book b", Book.class)
                 .getResultList();
     }
 
-    public void deleteAll() {
-        final String sql = """
-           DELETE FROM book
-           """;
-
-        TransactionHelper.executeUpdate(session, sql);
-    }
 
     public void insertBook(String bookTitle, long authorId) {
-        final String sql = """
-           INSERT INTO book
-           (book_title, author_id)
-           VALUES(:bookTitle, :authorId)
-           """;
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
 
-        TransactionHelper.executeUpdateWithParams(session, sql, "bookTitle", bookTitle, "authorId", authorId);
+
+            Author author = entityManager.find(Author.class, authorId);
+            if (author == null) {
+                throw new IllegalArgumentException("Author with id " + authorId + " does not exist.");
+            }
+
+
+            Book book = new Book();
+            book.setBookTitle(bookTitle);
+            book.setAuthor_id(authorId);
+            entityManager.persist(book);
+
+            transaction.commit();
+        } catch (IllegalArgumentException e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        } catch (RuntimeException e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Failed to insert book.", e);
+        }
     }
+
     public Book findBookByTitle(String bookTitle) {
-        final String hql = """
-           SELECT b FROM Book b WHERE b.bookTitle = :bookTitle
-           """;
-        return session.createQuery(hql, Book.class)
+        return entityManager.createQuery("SELECT b FROM Book b WHERE b.bookTitle = :bookTitle", Book.class)
                 .setParameter("bookTitle", bookTitle)
-                .uniqueResult();
+                .getSingleResult();
     }
-    public void deleteBook(long bookId) {
-        final String sql = """
-           DELETE FROM book WHERE id = :bookId
-           """;
-        TransactionHelper.executeDeleteWithParams(session, sql, "bookId", bookId);
+
+
+    public void deleteBook(String bookTitle) {
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+
+            Query query = entityManager.createQuery("DELETE FROM Book b WHERE b.bookTitle = :bookTitle");
+            query.setParameter("bookTitle", bookTitle);
+            query.executeUpdate();
+
+            transaction.commit();
+        } catch (RuntimeException e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
     }
+    public void clearBooks() {
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+            Query query = entityManager.createQuery("DELETE FROM Book");
+            query.executeUpdate();
+            transaction.commit();
+        } catch (RuntimeException e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw e;
+        }
+    }
+
 }

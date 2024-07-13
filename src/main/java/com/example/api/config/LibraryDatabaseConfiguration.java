@@ -35,7 +35,7 @@ public class LibraryDatabaseConfiguration {
                         .applySettings(configuration.getProperties())
                         .build();
 
-                 Metadata metadata = new MetadataSources(serviceRegistry)
+                Metadata metadata = new MetadataSources(serviceRegistry)
                         .getMetadataBuilder()
                         .build();
 
