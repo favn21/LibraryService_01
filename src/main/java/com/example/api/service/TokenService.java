@@ -11,10 +11,9 @@ import org.slf4j.LoggerFactory;
 public class TokenService {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
-    private static final String AUTH_URL = "http://localhost:8080/auth/login";
+    private static final String AUTH_URL = "http://localhost:8080/api/auth/login"; // Проверьте, что этот URL правильный
 
     public static String getAuthToken(String login, String password) {
-
 
         logger.debug("Sending authentication request for login: {}", login);
 
@@ -25,7 +24,9 @@ public class TokenService {
                 .body(authRequest)
                 .when()
                 .get(AUTH_URL)
-                .then().extract().response();
+                .then()
+                .extract()
+                .response();
 
         if (response.statusCode() != 200) {
             logger.warn("Failed to authenticate: {}", response.getStatusLine());

@@ -12,10 +12,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class BaseTest {
+
     private static final int PORT = 8080;
-    private static final String AUTH_URL = "/api/auth";
+    private static final Logger logger = LoggerFactory.getLogger(BaseTest.class);
 
     protected static EntityManagerFactory entityManagerFactory;
     protected EntityManager entityManager;
@@ -33,11 +36,24 @@ public abstract class BaseTest {
     public void setUp() {
         entityManager = entityManagerFactory.createEntityManager();
         bookRepository = new BookRepository(entityManager);
-        bookRepository.clearBooks();
+        clearBooks();
     }
 
     protected static String getBaseURI() {
         return "http://localhost:" + PORT;
+    }
+
+    private void clearBooks() {
+        try {
+            entityManager.getTransaction().begin();
+            entityManager.createQuery("DELETE FROM Book").executeUpdate();
+            entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            logger.error("Failed to clear books: {}", e.getMessage());
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+        }
     }
 
 }
