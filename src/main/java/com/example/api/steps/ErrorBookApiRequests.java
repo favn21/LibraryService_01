@@ -27,7 +27,7 @@ public class ErrorBookApiRequests {
         request.setAuthor(author);
 
         Response response =RequestBuilder.getRequestSpec(request, authToken)
-                .spec(RequestBuilder.requestSpecCreateBook(request, authToken))
+                .spec(RequestBuilder.requestSpecCreateBook(request))
                 .when()
                 .post()
                 .then()
@@ -44,7 +44,7 @@ public class ErrorBookApiRequests {
         }
 
         Response response = RequestBuilder.getRequestSpec(authToken)
-                .spec(RequestBuilder.requestSpecGetBooksByAuthor(authorId, authToken))
+                .spec(RequestBuilder.requestSpecGetBooksByAuthor(authorId))
                 .when()
                 .get()
                 .then()
@@ -70,7 +70,7 @@ public class ErrorBookApiRequests {
 
         if (title.equals("Детство") && authorId == 2L) {
             response = RequestBuilder.getRequestSpec(request, authToken)
-                    .spec(RequestBuilder.requestSpecCreateBook(request, authToken))
+                    .spec(RequestBuilder.requestSpecCreateBook(request))
                     .when()
                     .post()
                     .then()
@@ -79,7 +79,7 @@ public class ErrorBookApiRequests {
                     .response();
         } else {
             response = RequestBuilder.getRequestSpec(request, authToken)
-                    .spec(RequestBuilder.requestSpecCreateBook(request, authToken))
+                    .spec(RequestBuilder.requestSpecCreateBook(request))
                     .when()
                     .post()
                     .then()

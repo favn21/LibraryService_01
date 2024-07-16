@@ -25,7 +25,6 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Позитивный тест - Получение книг по автору (JSON)")
     @Description("Проверка, что можно получить книги автора в формате JSON")
     public void testGetBooksByAuthorJSON() {
-        installSpecification(requestSpec(), responseStatusCode(200));
         List<GetBooksByAuthorResponse.BookDetail> expectedBooks = new ArrayList<>();
         List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(2L, 200);
         BookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
@@ -36,7 +35,6 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Негативный тест - Получение книг по автору без указания ID")
     @Description("Проверка, что при запросе без ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithoutId() {
-        installSpecification(requestSpec(), responseStatusCode(409));
         BaseResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(0L, 409);
         BookAssertions.verifyFailedResponse(response, "1001", "Не передан обязательный параметр: autherId", "Не передан id автора");
 
@@ -47,7 +45,6 @@ public class GetBooksByAuthorTest extends BaseTest {
     @DisplayName("Негативный тест - Получение книг по автору с несуществующим ID")
     @Description("Проверка, что при запросе с несуществующим ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithNonexistentId() {
-        installSpecification(requestSpec(), responseStatusCode(409));
         BaseResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(999L, 409);
         BookAssertions.verifyFailedResponse(response, "1004", "Указанный автор не существует в таблице", null);
 
@@ -61,7 +58,6 @@ public class GetBooksByAuthorTest extends BaseTest {
         Long invalidAuthorId = -1L;
         int expectedStatusCode = 400;
 
-        installSpecification(requestSpec(), responseStatusCode(expectedStatusCode));
         BaseResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(invalidAuthorId, expectedStatusCode);
         BookAssertions.verifyFailedResponse(response, "1005", "Ошибка получения данных", "Недопустимое значение id");
 

@@ -35,28 +35,21 @@ public class RequestBuilder {
         return requestSpec("http://localhost:8080/library");
     }
 
-    public static RequestSpecification requestSpecCreateBook(CreateBookRequest body, String authToken) {
+    public static RequestSpecification requestSpecCreateBook(CreateBookRequest body) {
         return new RequestSpecBuilder()
-                .setBaseUri("http://localhost:8080/library")
                 .setBasePath("/books/save")
-                .addHeader("Authorization", "Bearer " + authToken)
-                .setContentType(ContentType.JSON)
                 .setBody(body)
                 .build();
     }
 
-    public static RequestSpecification requestSpecGetBooksByAuthor(Long authorId, String authToken) {
+    public static RequestSpecification requestSpecGetBooksByAuthor(Long authorId) {
         return new RequestSpecBuilder()
-                .setBaseUri("http://localhost:8080/library")
                 .setBasePath("/authors/" + authorId + "/books")
-                .addHeader("Authorization", "Bearer " + authToken)
-                .setContentType(ContentType.JSON)
                 .build();
     }
 
     public static RequestSpecification getRequestSpec(Object request, String authToken) {
         return given()
-                .baseUri("http://localhost:8080/library")
                 .contentType(ContentType.JSON)
                 .header("Authorization", "Bearer " + authToken)
                 .body(request);
@@ -64,7 +57,6 @@ public class RequestBuilder {
 
     public static RequestSpecification getRequestSpec(String authToken) {
         return given()
-                .baseUri("http://localhost:8080/library")
                 .header("Authorization", "Bearer " + authToken);
     }
 

@@ -33,7 +33,7 @@ public class BookApiRequests {
         request.setAuthor(author);
 
         return RequestBuilder.getRequestSpec(request, authToken)
-                .spec(RequestBuilder.requestSpecCreateBook(request, authToken))
+                .spec(RequestBuilder.requestSpecCreateBook(request))
                 .when()
                 .post()
                 .then()
@@ -46,7 +46,7 @@ public class BookApiRequests {
         ensureAuthToken();
 
         return RequestBuilder.getRequestSpec(authToken)
-                .spec(RequestBuilder.requestSpecGetBooksByAuthor(authorId, authToken))
+                .spec(RequestBuilder.requestSpecGetBooksByAuthor(authorId))
                 .when()
                 .get()
                 .then()
