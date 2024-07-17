@@ -2,11 +2,13 @@ package com.example.api.models.response;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import lombok.Getter;
 
 
-@Data
+
+@Getter
 public class TokenResponse {
-    @JsonProperty("token")
-    private String token;
+    @JsonProperty("jwtToken")
+    public String jwtToken;
+
 }

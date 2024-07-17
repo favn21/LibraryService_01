@@ -3,20 +3,18 @@ package com.example.api.service;
 import com.example.api.models.request.TokenRequest;
 import com.example.api.models.response.TokenResponse;
 import io.restassured.RestAssured;
+import io.restassured.filter.log.RequestLoggingFilter;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 public class TokenService {
 
-    private static final Logger logger = LoggerFactory.getLogger(TokenService.class);
     private static final String AUTH_URL = "http://localhost:8080/auth/login";
 
     public static String getAuthToken(String login, String password) {
-
-
-        logger.debug("Sending authentication request for login: {}", login);
+        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
         TokenRequest authRequest = new TokenRequest(login, password);
 
@@ -30,13 +28,7 @@ public class TokenService {
                 .extract()
                 .response();
 
-        if (response.statusCode() != 200) {
-            logger.warn("Failed to authenticate: {}", response.getStatusLine());
-            throw new RuntimeException("Failed to authenticate: " + response.getStatusLine());
-        }
-
         TokenResponse tokenResponse = response.as(TokenResponse.class);
-        logger.info("Successfully authenticated. Token: {}", tokenResponse.getToken());
-        return tokenResponse.getToken();
+        return tokenResponse.getJwtToken();
     }
 }

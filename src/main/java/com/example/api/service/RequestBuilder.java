@@ -60,12 +60,4 @@ public class RequestBuilder {
                 .header("Authorization", "Bearer " + authToken);
     }
 
-    public static ResponseSpecification responseStatusCode(int statusCode) {
-        return new ResponseSpecBuilder().expectStatusCode(statusCode).build();
-    }
-
-    public static void installSpecification(RequestSpecification request, ResponseSpecification response) {
-        RestAssured.requestSpecification = request;
-        RestAssured.responseSpecification = response;
-    }
 }
