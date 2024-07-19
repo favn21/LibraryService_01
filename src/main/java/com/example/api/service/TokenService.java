@@ -14,12 +14,13 @@ public class TokenService {
     private static final String AUTH_URL = "http://localhost:8080/auth/login";
 
     public static String getAuthToken(String login, String password) {
-        RestAssured.filters(new RequestLoggingFilter(), new ResponseLoggingFilter());
 
         TokenRequest authRequest = new TokenRequest(login, password);
 
         Response response = RestAssured.given()
                 .contentType(ContentType.JSON)
+                .filter(new RequestLoggingFilter())
+                .filter(new ResponseLoggingFilter())
                 .body(authRequest)
                 .when()
                 .get(AUTH_URL)

@@ -80,15 +80,9 @@ public class BookAssertions {
         query.setParameter("bookId", bookId);
         Book book = query.getSingleResult();
 
-        if (book == null) {
-            throw new AssertionError("Book with ID " + bookId + " does not exist in the database.");
-        }
-        if (!book.getBookTitle().equals(expectedTitle)) {
-            throw new AssertionError("Expected title to be " + expectedTitle + " but was " + book.getBookTitle());
-        }
-        if (!book.getAuthor_id().equals(expectedAuthorId)) {
-            throw new AssertionError("Expected author ID to be " + expectedAuthorId + " but was " + book.getAuthor_id());
-        }
+        assertNotNull(book);
+        assertEquals(expectedTitle, book.getBookTitle());
+        assertEquals(expectedAuthorId, book.getAuthor_id());
     }
 
     public static void verifyBookNotInDatabase(Long bookId) {
@@ -96,20 +90,14 @@ public class BookAssertions {
         query.setParameter("bookId", bookId);
         Long count = query.getSingleResult();
 
-        if (count > 0) {
-            throw new AssertionError("Book with ID " + bookId + " exists in the database, but it should not.");
-        }
+        assertEquals(0L, count);
     }
 
-
     public static void verifyNoBooksInDatabaseWithAuthorId(Long authorId) {
-        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.authorId = :authorId", Long.class);
+        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.author_id = :authorId", Long.class);
         query.setParameter("authorId", authorId);
         Long count = query.getSingleResult();
 
-        if (count > 0) {
-            throw new AssertionError("Books with author ID " + authorId + " exist in the database, but they should not.");
-        }
+        assertEquals(0L, count);
     }
-
 }

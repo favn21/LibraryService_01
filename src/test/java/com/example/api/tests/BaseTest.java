@@ -15,8 +15,6 @@ import javax.persistence.Persistence;
 
 
 public abstract class BaseTest {
-    private static final int PORT = 8080;
-
 
     protected static EntityManagerFactory entityManagerFactory;
     protected EntityManager entityManager;
@@ -38,7 +36,7 @@ public abstract class BaseTest {
     }
 
     protected static String getBaseURI() {
-        return "http://localhost:" + PORT;
+        return "http://localhost:8080/library";
     }
 
 }
