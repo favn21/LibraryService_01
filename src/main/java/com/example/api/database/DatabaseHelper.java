@@ -4,6 +4,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class DatabaseHelper {
@@ -38,12 +40,11 @@ public class DatabaseHelper {
         }
     }
 
-    public static <T> T getRecordByField(Class<T> entityClass, String fieldName, Object value) {
-        try (Session session = getSession()) {
-            Query<T> query = session.createQuery("FROM " + entityClass.getSimpleName() + " WHERE " + fieldName + " = :value", entityClass);
-            query.setParameter("value", value);
-            return query.uniqueResult();
-        }
+    public static <T> T getRecordByField(Class<T> entityClass, String fieldName, Object value, EntityManager entityManager) {
+        String queryStr = "SELECT e FROM " + entityClass.getSimpleName() + " e WHERE e." + fieldName + " = :value";
+        TypedQuery<T> query = entityManager.createQuery(queryStr, entityClass);
+        query.setParameter("value", value);
+        return query.getSingleResult();
     }
 
     public static void deleteRecordById(Class<?> entityClass, Long id) {

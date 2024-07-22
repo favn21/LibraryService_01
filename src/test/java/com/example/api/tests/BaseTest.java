@@ -7,6 +7,8 @@ import com.example.api.service.TokenService;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -33,6 +35,20 @@ public abstract class BaseTest {
         entityManager = entityManagerFactory.createEntityManager();
         bookRepository = new BookRepository(entityManager);
         bookRepository.clearBooks();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        if (entityManager != null && entityManager.isOpen()) {
+            entityManager.close();
+        }
+    }
+
+    @AfterAll
+    public static void tearDownAll() {
+        if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+            entityManagerFactory.close();
+        }
     }
 
     protected static String getBaseURI() {

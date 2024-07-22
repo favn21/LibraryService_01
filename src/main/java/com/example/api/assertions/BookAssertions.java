@@ -19,18 +19,19 @@ import java.util.List;
 public class BookAssertions {
     private static EntityManager entityManager;
 
-    public BookAssertions(EntityManager entityManager) {
+    public static void setEntityManager(EntityManager entityManager) {
         BookAssertions.entityManager = entityManager;
     }
 
-    public static void verifyCreateBookResponse( CreateBookResponse createBookResponse) {
+    public static void verifyCreateBookResponse(CreateBookResponse createBookResponse) {
         assertNotNull(createBookResponse);
         assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
 
-        Book bookInDb = DatabaseHelper.getRecordByField(Book.class, "id", createBookResponse.getBookId());
+        Book bookInDb = DatabaseHelper.getRecordByField(Book.class, "id", createBookResponse.getBookId(), entityManager);
         assertNotNull(bookInDb, "Книга должна быть сохранена в базе данных");
-        assertThat(bookInDb.getBookTitle(), is(createBookResponse.getBookId()));
+        assertThat(bookInDb.getId(), is(createBookResponse.getBookId()));
     }
+
 
     public static void verifyGetBooksByAuthorResponse(List<BookDetail> actualBooks, List<BookDetail> expectedBooks) {
         assertNotNull(actualBooks);
@@ -50,13 +51,14 @@ public class BookAssertions {
                     hasProperty("familyName", is(expectedBook.getAuthor().getFamilyName())),
                     hasProperty("birthDate", is(expectedBook.getAuthor().getBirthDate().format(DateTimeFormatter.ISO_DATE)))
             ));
-            Book bookInDb = DatabaseHelper.getRecordByField(Book.class, "id", actualBook.getId());
+
+            Book bookInDb = DatabaseHelper.getRecordByField(Book.class, "id", actualBook.getId(), entityManager);
             assertNotNull(bookInDb, "Книга должна быть в базе данных");
             assertThat(bookInDb.getBookTitle(), is(actualBook.getBookTitle()));
         }
     }
 
-    public static void verifyFailedResponse( BaseResponse baseResponse, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
+    public static void verifyFailedResponse(BaseResponse baseResponse, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
         assertNotNull(baseResponse);
         assertEquals(expectedErrorCode, baseResponse.getErrorCode());
         assertEquals(expectedErrorMessage, baseResponse.getErrorMessage());
@@ -67,6 +69,7 @@ public class BookAssertions {
             assertNull(baseResponse.getErrorDetails());
         }
     }
+
     public static void bookListSize(int expectedSize, List<Book> books) {
         assertEquals(expectedSize, books.size(), () -> "Expected size: " + expectedSize + ", actual size: " + books.size());
     }
