@@ -46,7 +46,7 @@ public abstract class BaseTest {
 
     @AfterAll
     public static void tearDownAll() {
-        if (entityManagerFactory != null && entityManagerFactory.isOpen()) {
+        if (entityManagerFactory != null) {
             entityManagerFactory.close();
         }
     }

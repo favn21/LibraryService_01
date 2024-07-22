@@ -1,7 +1,9 @@
 package com.example.api.service;
 
+import com.example.api.config.JacksonConfig;
 import com.example.api.models.request.TokenRequest;
 import com.example.api.models.response.TokenResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;
@@ -12,9 +14,13 @@ import io.restassured.response.Response;
 public class TokenService {
 
     private static final String AUTH_URL = "http://localhost:8080/auth/login";
+    private static ObjectMapper objectMapper;
+
+    public TokenService() {
+        this.objectMapper = JacksonConfig.createObjectMapper();
+    }
 
     public static String getAuthToken(String login, String password) {
-
         TokenRequest authRequest = new TokenRequest(login, password);
 
         Response response = RestAssured.given()
@@ -23,13 +29,17 @@ public class TokenService {
                 .filter(new ResponseLoggingFilter())
                 .body(authRequest)
                 .when()
-                .get(AUTH_URL)
+                .get(AUTH_URL) // Используйте POST, если это правильный метод
                 .then()
                 .statusCode(200)
                 .extract()
                 .response();
 
-        TokenResponse tokenResponse = response.as(TokenResponse.class);
-        return tokenResponse.getJwtToken();
+        try {
+            TokenResponse tokenResponse = objectMapper.readValue(response.asString(), TokenResponse.class);
+            return tokenResponse.getJwtToken();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse token response", e);
+        }
     }
 }
