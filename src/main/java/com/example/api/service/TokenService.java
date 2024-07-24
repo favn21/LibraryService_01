@@ -14,11 +14,6 @@ import io.restassured.response.Response;
 public class TokenService {
 
     private static final String AUTH_URL = "http://localhost:8080/auth/login";
-    private static ObjectMapper objectMapper;
-
-    public TokenService() {
-        this.objectMapper = JacksonConfig.createObjectMapper();
-    }
 
     public static String getAuthToken(String login, String password) {
         TokenRequest authRequest = new TokenRequest(login, password);
@@ -29,17 +24,13 @@ public class TokenService {
                 .filter(new ResponseLoggingFilter())
                 .body(authRequest)
                 .when()
-                .get(AUTH_URL) // Используйте POST, если это правильный метод
+                .get(AUTH_URL)
                 .then()
                 .statusCode(200)
                 .extract()
                 .response();
 
-        try {
-            TokenResponse tokenResponse = objectMapper.readValue(response.asString(), TokenResponse.class);
-            return tokenResponse.getJwtToken();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse token response", e);
-        }
+        TokenResponse tokenResponse = response.as(TokenResponse.class);
+        return tokenResponse.getJwtToken();
     }
 }

@@ -1,59 +1,42 @@
 package com.example.api.tests;
 
 
-import com.example.api.repository.BookRepository;
+import com.example.api.config.JacksonConfig;
 import com.example.api.service.TokenService;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 
 
 
-public abstract class BaseTest {
 
-    protected static EntityManagerFactory entityManagerFactory;
-    protected EntityManager entityManager;
-    protected BookRepository bookRepository;
-    private static TokenService tokenService;
+public abstract class BaseTest extends BaseTestDB {
+
+    protected static TokenService tokenService;
+    protected static ObjectMapper mapper;
 
     @BeforeAll
     public static void setup() {
         RestAssured.baseURI = getBaseURI();
-        entityManagerFactory = Persistence.createEntityManagerFactory("LibraryPersistenceUnit");
         tokenService = new TokenService();
+        mapper = JacksonConfig.objectMapper();
     }
 
     @BeforeEach
     public void setUp() {
-        entityManager = entityManagerFactory.createEntityManager();
-        bookRepository = new BookRepository(entityManager);
-        bookRepository.clearBooks();
+        super.setUp();
     }
 
     @AfterEach
     public void tearDown() {
-        if (entityManager != null && entityManager.isOpen()) {
-            entityManager.close();
-        }
-    }
-
-    @AfterAll
-    public static void tearDownAll() {
-        if (entityManagerFactory != null) {
-            entityManagerFactory.close();
-        }
+        super.tearDown();
     }
 
     protected static String getBaseURI() {
         return "http://localhost:8080/library";
     }
-
 }
 

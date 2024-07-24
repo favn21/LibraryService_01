@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -23,7 +24,7 @@ public class Book implements Serializable {
     private String bookTitle;
 
     @Column(name = "updated")
-    private LocalDateTime updated;
+    private OffsetDateTime updated;
 
     @Column(name = "author_id")
     private Long author_id;

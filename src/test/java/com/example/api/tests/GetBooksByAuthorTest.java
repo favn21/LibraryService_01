@@ -21,14 +21,17 @@ import static com.example.api.service.RequestBuilder.*;
 @Epic("LibraryService")
 @Story("Получить список книг по ID автора")
 public class GetBooksByAuthorTest extends BaseTest {
+
+    BookAssertions bookAssertions = new BookAssertions(entityManager);
+
     @Test
     @DisplayName("Позитивный тест - Получение книг по автору (JSON)")
     @Description("Проверка, что можно получить книги автора в формате JSON")
     public void testGetBooksByAuthorJSON() {
         List<GetBooksByAuthorResponse.BookDetail> expectedBooks = new ArrayList<>();
         List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(2L, 200);
-        BookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
-        expectedBooks.forEach(book -> BookAssertions.verifyBookInDatabase(book.getId(), book.getBookTitle(), 2L));
+        bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
+        expectedBooks.forEach(book -> bookAssertions.verifyBookInDatabase(book.getId(), book.getBookTitle(), 2L));
     }
 
     @Test
@@ -36,9 +39,9 @@ public class GetBooksByAuthorTest extends BaseTest {
     @Description("Проверка, что при запросе без ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithoutId() {
         BaseResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(0L, 409);
-        BookAssertions.verifyFailedResponse(response, "1001", "Не передан обязательный параметр: autherId", "Не передан id автора");
+        bookAssertions.verifyFailedResponse(response, "1001", "Не передан обязательный параметр: autherId", "Не передан id автора");
 
-        BookAssertions.verifyNoBooksInDatabaseWithAuthorId(0L);
+        bookAssertions.verifyNoBooksInDatabaseWithAuthorId(0L);
     }
 
     @Test
@@ -46,9 +49,9 @@ public class GetBooksByAuthorTest extends BaseTest {
     @Description("Проверка, что при запросе с несуществующим ID автора возвращается ошибка")
     public void testGetBooksByAuthorWithNonexistentId() {
         BaseResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(999L, 409);
-        BookAssertions.verifyFailedResponse(response, "1004", "Указанный автор не существует в таблице", null);
+        bookAssertions.verifyFailedResponse(response, "1004", "Указанный автор не существует в таблице", null);
 
-        BookAssertions.verifyNoBooksInDatabaseWithAuthorId(999L);
+        bookAssertions.verifyNoBooksInDatabaseWithAuthorId(999L);
     }
 
     @Test
@@ -59,8 +62,8 @@ public class GetBooksByAuthorTest extends BaseTest {
         int expectedStatusCode = 400;
 
         BaseResponse response = ErrorBookApiRequests.getBooksByAuthorWithError(invalidAuthorId, expectedStatusCode);
-        BookAssertions.verifyFailedResponse(response, "1005", "Ошибка получения данных", "Недопустимое значение id");
+        bookAssertions.verifyFailedResponse(response, "1005", "Ошибка получения данных", "Недопустимое значение id");
 
-        BookAssertions.verifyNoBooksInDatabaseWithAuthorId(invalidAuthorId);
+        bookAssertions.verifyNoBooksInDatabaseWithAuthorId(invalidAuthorId);
     }
 }

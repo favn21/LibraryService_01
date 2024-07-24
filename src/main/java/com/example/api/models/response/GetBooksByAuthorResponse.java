@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Data
@@ -29,7 +30,7 @@ public class GetBooksByAuthorResponse extends BaseResponse {
         private AuthorDetail author;
 
         @JsonProperty("updated")
-        private LocalDateTime updated;
+        private OffsetDateTime updated;
     }
 
     @Data

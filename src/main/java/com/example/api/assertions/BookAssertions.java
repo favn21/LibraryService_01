@@ -17,23 +17,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class BookAssertions {
-    private static EntityManager entityManager;
+    private final EntityManager entityManager;
 
-    public static void setEntityManager(EntityManager entityManager) {
-        BookAssertions.entityManager = entityManager;
+    public BookAssertions(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
-    public static void verifyCreateBookResponse(CreateBookResponse createBookResponse) {
+    public void verifyCreateBookResponse(CreateBookResponse createBookResponse) {
         assertNotNull(createBookResponse);
         assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
 
-        Book bookInDb = DatabaseHelper.getRecordByField(Book.class, "id", createBookResponse.getBookId(), entityManager);
+        Book bookInDb = DatabaseHelper.getRecordByField(entityManager, Book.class, "id", createBookResponse.getBookId());
         assertNotNull(bookInDb, "Книга должна быть сохранена в базе данных");
         assertThat(bookInDb.getId(), is(createBookResponse.getBookId()));
     }
 
 
-    public static void verifyGetBooksByAuthorResponse(List<BookDetail> actualBooks, List<BookDetail> expectedBooks) {
+    public void verifyGetBooksByAuthorResponse(List<BookDetail> actualBooks, List<BookDetail> expectedBooks) {
         assertNotNull(actualBooks);
         assertEquals(expectedBooks.size(), actualBooks.size());
 
@@ -52,13 +52,13 @@ public class BookAssertions {
                     hasProperty("birthDate", is(expectedBook.getAuthor().getBirthDate().format(DateTimeFormatter.ISO_DATE)))
             ));
 
-            Book bookInDb = DatabaseHelper.getRecordByField(Book.class, "id", actualBook.getId(), entityManager);
+            Book bookInDb = DatabaseHelper.getRecordByField(entityManager, Book.class, "id", actualBook.getId());
             assertNotNull(bookInDb, "Книга должна быть в базе данных");
             assertThat(bookInDb.getBookTitle(), is(actualBook.getBookTitle()));
         }
     }
 
-    public static void verifyFailedResponse(BaseResponse baseResponse, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
+    public void verifyFailedResponse(BaseResponse baseResponse, String expectedErrorCode, String expectedErrorMessage, String expectedErrorDetails) {
         assertNotNull(baseResponse);
         assertEquals(expectedErrorCode, baseResponse.getErrorCode());
         assertEquals(expectedErrorMessage, baseResponse.getErrorMessage());
@@ -70,15 +70,15 @@ public class BookAssertions {
         }
     }
 
-    public static void bookListSize(int expectedSize, List<Book> books) {
+    public void bookListSize(int expectedSize, List<Book> books) {
         assertEquals(expectedSize, books.size(), () -> "Expected size: " + expectedSize + ", actual size: " + books.size());
     }
 
-    public static void bookNotNull(String message, Book book) {
+    public void bookNotNull(String message, Book book) {
         assertNotNull(book, message);
     }
 
-    public static void verifyBookInDatabase(Long bookId, String expectedTitle, Long expectedAuthorId) {
+    public void verifyBookInDatabase(Long bookId, String expectedTitle, Long expectedAuthorId) {
         TypedQuery<Book> query = entityManager.createQuery("SELECT b FROM Book b WHERE b.id = :bookId", Book.class);
         query.setParameter("bookId", bookId);
         Book book = query.getSingleResult();
@@ -88,7 +88,7 @@ public class BookAssertions {
         assertEquals(expectedAuthorId, book.getAuthor_id());
     }
 
-    public static void verifyBookNotInDatabase(Long bookId) {
+    public void verifyBookNotInDatabase(Long bookId) {
         TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.id = :bookId", Long.class);
         query.setParameter("bookId", bookId);
         Long count = query.getSingleResult();
@@ -96,7 +96,7 @@ public class BookAssertions {
         assertEquals(0L, count);
     }
 
-    public static void verifyNoBooksInDatabaseWithAuthorId(Long authorId) {
+    public void verifyNoBooksInDatabaseWithAuthorId(Long authorId) {
         TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.author_id = :authorId", Long.class);
         query.setParameter("authorId", authorId);
         Long count = query.getSingleResult();

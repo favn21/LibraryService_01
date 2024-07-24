@@ -40,11 +40,11 @@ public class DatabaseHelper {
         }
     }
 
-    public static <T> T getRecordByField(Class<T> entityClass, String fieldName, Object value, EntityManager entityManager) {
-        String queryStr = "SELECT e FROM " + entityClass.getSimpleName() + " e WHERE e." + fieldName + " = :value";
-        TypedQuery<T> query = entityManager.createQuery(queryStr, entityClass);
-        query.setParameter("value", value);
-        return query.getSingleResult();
+    public static <T> T getRecordByField(EntityManager entityManager, Class<T> entityClass, String fieldName, Object value) {
+        String query = "SELECT e FROM " + entityClass.getSimpleName() + " e WHERE e." + fieldName + " = :value";
+        return entityManager.createQuery(query, entityClass)
+                .setParameter("value", value)
+                .getSingleResult();
     }
 
     public static void deleteRecordById(Class<?> entityClass, Long id) {

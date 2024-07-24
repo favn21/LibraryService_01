@@ -9,7 +9,7 @@ import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BookRepositoryTest extends BaseTestDB {
-
+    BookAssertions bookAssertions = new BookAssertions(entityManager);
     @Test
     @DisplayName("Тест работы с таблицей Book")
     public void testBookRepository() {
@@ -18,15 +18,15 @@ public class BookRepositoryTest extends BaseTestDB {
         bookRepository.insertBook("Книга 2", 1L);
 
         List<Book> allBooks = bookRepository.findAll();
-        BookAssertions.bookListSize(2, allBooks);
+        bookAssertions.bookListSize(2, allBooks);
 
         Book bookByTitle = bookRepository.findBookByTitle("Книга 1");
-        BookAssertions.bookNotNull("Запись с названием 'Книга 1' не найдена", bookByTitle);
+        bookAssertions.bookNotNull("Запись с названием 'Книга 1' не найдена", bookByTitle);
 
         bookRepository.deleteBook("Книга 2");
 
         List<Book> remainingBooks = bookRepository.findAll();
-        BookAssertions.bookListSize(1, remainingBooks);
+        bookAssertions.bookListSize(1, remainingBooks);
         bookRepository.clearBooks();
 
 
