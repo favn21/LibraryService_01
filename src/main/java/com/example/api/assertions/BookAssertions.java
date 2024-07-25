@@ -5,6 +5,9 @@ import com.example.api.db.Book;
 import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse.BookDetail;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -18,9 +21,13 @@ import java.util.List;
 
 public class BookAssertions {
     private final EntityManager entityManager;
+    private final ObjectMapper mapper;
 
     public BookAssertions(EntityManager entityManager) {
         this.entityManager = entityManager;
+        this.mapper = new ObjectMapper();
+        this.mapper.registerModule(new JavaTimeModule());
+        this.mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     public void verifyCreateBookResponse(CreateBookResponse createBookResponse) {

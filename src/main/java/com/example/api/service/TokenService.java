@@ -1,9 +1,7 @@
 package com.example.api.service;
 
-import com.example.api.config.JacksonConfig;
 import com.example.api.models.request.TokenRequest;
 import com.example.api.models.response.TokenResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.filter.log.RequestLoggingFilter;
 import io.restassured.filter.log.ResponseLoggingFilter;

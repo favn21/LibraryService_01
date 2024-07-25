@@ -1,10 +1,11 @@
 package com.example.api.tests;
 
 
-import com.example.api.config.JacksonConfig;
 import com.example.api.service.TokenService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,9 @@ public abstract class BaseTest extends BaseTestDB {
     public static void setup() {
         RestAssured.baseURI = getBaseURI();
         tokenService = new TokenService();
-        mapper = JacksonConfig.objectMapper();
+        mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @BeforeEach
