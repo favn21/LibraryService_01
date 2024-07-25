@@ -9,17 +9,22 @@ import com.example.api.assertions.BookAssertions;
 import io.qameta.allure.Description;
 import com.example.api.db.Book;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.example.api.service.RequestBuilder.*;
 
 public class CreateBookTest extends BaseTest {
 
     private final BookApiRequests bookSteps = new BookApiRequests();
     BookAssertions bookAssertions = new BookAssertions(entityManager);
+    @BeforeEach
+    public void setUp() {
+        super.setUp();
+        bookAssertions = new BookAssertions(entityManager);
+    }
 
     @Test
     @DisplayName("Позитивный тест - Сохранение новой книги")
@@ -28,6 +33,7 @@ public class CreateBookTest extends BaseTest {
         CreateBookResponse response = bookSteps.createBook("Детство", 2L, 201);
         bookAssertions.verifyCreateBookResponse(response);
         bookAssertions.verifyBookInDatabase(response.getBookId(), "Детство", 2L);
+        bookRepository.clearBooks();
     }
 
     @Test
@@ -37,6 +43,7 @@ public class CreateBookTest extends BaseTest {
         BaseResponse response = ErrorBookApiRequests.createBookWithError(3L, null, 400);
         bookAssertions.verifyFailedResponse(response, "1001", "Не передан обязательный параметр: bookTitle", "Не передано наименование книги");
         bookAssertions.verifyBookNotInDatabase(3L);
+        bookRepository.clearBooks();
     }
 
     @Test
@@ -46,16 +53,18 @@ public class CreateBookTest extends BaseTest {
         BaseResponse response = ErrorBookApiRequests.createBookWithError(999L, "Детство", 409);
         bookAssertions.verifyFailedResponse(response, "1004", "Указанный автор не существует в таблице", null);
         bookAssertions.verifyBookNotInDatabase(999L);
+        bookRepository.clearBooks();
     }
 
     @Test
     @DisplayName("Негативный тест - Сохранение уже существующей книги")
     @Description("Проверка, что при попытке сохранить книгу, которая уже существует, возвращается ошибка конфликта")
     public void testCreateBookWithSavingError() {
-        BaseResponse response = ErrorBookApiRequests.createBookWithErrorAndMock(2L, "Детство", 500);
+        BaseResponse response = ErrorBookApiRequests.createDuplicateBook(2L, "Детство", 500);
         bookAssertions.verifyFailedResponse(response, "1003", "Книга уже существует в библиотеке", null);
 
         List<Book> booksInDb = DatabaseHelper.getRecordsByField(Book.class, "bookTitle", "Детство");
         bookAssertions.bookListSize(1, booksInDb);
+        bookRepository.clearBooks();
     }
 }

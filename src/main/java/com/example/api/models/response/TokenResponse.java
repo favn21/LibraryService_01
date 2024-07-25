@@ -10,5 +10,4 @@ import lombok.Getter;
 public class TokenResponse {
     @JsonProperty("jwtToken")
     public String jwtToken;
-
 }

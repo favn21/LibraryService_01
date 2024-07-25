@@ -10,7 +10,6 @@ import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.cfg.Configuration;
 import com.example.api.db.Book;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
@@ -62,7 +61,5 @@ public class LibraryDatabaseConfiguration {
         return Persistence.createEntityManagerFactory("LibraryPersistenceUnit");
     }
 
-    public static EntityManager getEntityManager() {
-        return entityManagerFactory.createEntityManager();
-    }
+
 }

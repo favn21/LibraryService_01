@@ -28,7 +28,5 @@ public class BookRepositoryTest extends BaseTestDB {
         List<Book> remainingBooks = bookRepository.findAll();
         bookAssertions.bookListSize(1, remainingBooks);
         bookRepository.clearBooks();
-
-
     }
 }

@@ -2,15 +2,11 @@ package com.example.api.db;
 
 import javax.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Data
-@NoArgsConstructor
 @Entity
 @Table(name = "books")
 public class Book implements Serializable {
@@ -28,8 +24,4 @@ public class Book implements Serializable {
 
     @Column(name = "author_id")
     private Long author_id;
-
-
-
-
 }

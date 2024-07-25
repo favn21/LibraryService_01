@@ -9,6 +9,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Story;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,13 +17,17 @@ import java.util.ArrayList;
 
 import java.util.List;
 
-import static com.example.api.service.RequestBuilder.*;
 
 @Epic("LibraryService")
 @Story("Получить список книг по ID автора")
 public class GetBooksByAuthorTest extends BaseTest {
 
     BookAssertions bookAssertions = new BookAssertions(entityManager);
+    @BeforeEach
+    public void setUp() {
+        super.setUp();
+        bookAssertions = new BookAssertions(entityManager);
+    }
 
     @Test
     @DisplayName("Позитивный тест - Получение книг по автору (JSON)")
@@ -32,6 +37,7 @@ public class GetBooksByAuthorTest extends BaseTest {
         List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(2L, 200);
         bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
         expectedBooks.forEach(book -> bookAssertions.verifyBookInDatabase(book.getId(), book.getBookTitle(), 2L));
+        bookRepository.clearBooks();
     }
 
     @Test
@@ -42,6 +48,7 @@ public class GetBooksByAuthorTest extends BaseTest {
         bookAssertions.verifyFailedResponse(response, "1001", "Не передан обязательный параметр: autherId", "Не передан id автора");
 
         bookAssertions.verifyNoBooksInDatabaseWithAuthorId(0L);
+        bookRepository.clearBooks();
     }
 
     @Test
@@ -52,6 +59,7 @@ public class GetBooksByAuthorTest extends BaseTest {
         bookAssertions.verifyFailedResponse(response, "1004", "Указанный автор не существует в таблице", null);
 
         bookAssertions.verifyNoBooksInDatabaseWithAuthorId(999L);
+        bookRepository.clearBooks();
     }
 
     @Test
@@ -65,5 +73,6 @@ public class GetBooksByAuthorTest extends BaseTest {
         bookAssertions.verifyFailedResponse(response, "1005", "Ошибка получения данных", "Недопустимое значение id");
 
         bookAssertions.verifyNoBooksInDatabaseWithAuthorId(invalidAuthorId);
+        bookRepository.clearBooks();
     }
 }

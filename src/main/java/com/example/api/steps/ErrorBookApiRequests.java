@@ -55,7 +55,7 @@ public class ErrorBookApiRequests {
         return response.as(BaseResponse.class);
     }
 
-    public static BaseResponse createBookWithErrorAndMock(Long authorId, String title, int statusCode) {
+    public static BaseResponse createDuplicateBook(Long authorId, String title, int statusCode) {
         if (authToken == null) {
             authToken = TokenService.getAuthToken(login, password);
         }
