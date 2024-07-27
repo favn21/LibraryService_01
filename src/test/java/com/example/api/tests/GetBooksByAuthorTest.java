@@ -1,5 +1,7 @@
 package com.example.api.tests;
 
+import com.example.api.database.DatabaseHelper;
+import com.example.api.db.Book;
 import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse;
 import com.example.api.steps.BookApiRequests;
@@ -13,9 +15,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Epic("LibraryService")
@@ -30,16 +34,45 @@ public class GetBooksByAuthorTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("Позитивный тест - Получение книг по автору (JSON)")
+    @DisplayName("Позитивный тест - Получение книг по автору (JSON) без книг")
     @Description("Проверка, что можно получить книги автора в формате JSON")
     public void testGetBooksByAuthorJSON() {
         List<GetBooksByAuthorResponse.BookDetail> expectedBooks = new ArrayList<>();
         List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(2L, 200);
         bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
         expectedBooks.forEach(book -> bookAssertions.verifyBookInDatabase(book.getId(), book.getBookTitle(), 2L));
-        bookRepository.clearBooks();
     }
+    @Test
+    @DisplayName("Позитивный тест - Получение книг по автору(JSON), когда у автора есть книги")
+    @Description("Проверка, что при запросе книг по автору, у которого уже есть книги, возвращаются все книги этого автора")
+    public void testGetBooksByAuthorWithExistingBooks() {
+        long authorId = 1L;
 
+        bookRepository.insertBook("Книга 1", authorId);
+        bookRepository.insertBook("Книга 2", authorId);
+
+        List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(authorId, 200);
+        List<Book> booksInDb = DatabaseHelper.getRecordsByField(Book.class, "author_id", authorId);
+
+        List<GetBooksByAuthorResponse.BookDetail> expectedBooks = booksInDb.stream()
+                .map(book -> {
+                    GetBooksByAuthorResponse.AuthorDetail authorDetail = new GetBooksByAuthorResponse.AuthorDetail();
+                    authorDetail.setId(book.getAuthor_id());
+                    authorDetail.setFirstName("Имя");
+                    authorDetail.setSecondName("Отчество");
+                    authorDetail.setFamilyName("Фамилия");
+                    authorDetail.setBirthDate(LocalDate.now());
+
+                    GetBooksByAuthorResponse.BookDetail bookDetail = new GetBooksByAuthorResponse.BookDetail();
+                    bookDetail.setId(book.getId());
+                    bookDetail.setBookTitle(book.getBookTitle());
+                    bookDetail.setAuthor(authorDetail);
+
+                    return bookDetail;
+                })
+                .collect(Collectors.toList());
+        bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
+    }
     @Test
     @DisplayName("Негативный тест - Получение книг по автору без указания ID")
     @Description("Проверка, что при запросе без ID автора возвращается ошибка")
@@ -48,7 +81,6 @@ public class GetBooksByAuthorTest extends BaseTest {
         bookAssertions.verifyFailedResponse(response, "1001", "Не передан обязательный параметр: autherId", "Не передан id автора");
 
         bookAssertions.verifyNoBooksInDatabaseWithAuthorId(0L);
-        bookRepository.clearBooks();
     }
 
     @Test
@@ -59,7 +91,6 @@ public class GetBooksByAuthorTest extends BaseTest {
         bookAssertions.verifyFailedResponse(response, "1004", "Указанный автор не существует в таблице", null);
 
         bookAssertions.verifyNoBooksInDatabaseWithAuthorId(999L);
-        bookRepository.clearBooks();
     }
 
     @Test
@@ -73,6 +104,5 @@ public class GetBooksByAuthorTest extends BaseTest {
         bookAssertions.verifyFailedResponse(response, "1005", "Ошибка получения данных", "Недопустимое значение id");
 
         bookAssertions.verifyNoBooksInDatabaseWithAuthorId(invalidAuthorId);
-        bookRepository.clearBooks();
     }
 }

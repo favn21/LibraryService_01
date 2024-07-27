@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,6 +34,12 @@ public class BookAssertions {
     public void verifyCreateBookResponse(CreateBookResponse createBookResponse) {
         assertNotNull(createBookResponse);
         assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
+
+        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.id = :bookId", Long.class);
+        query.setParameter("bookId", createBookResponse.getBookId());
+        Long count = query.getSingleResult();
+
+        assertEquals(1L, count, "Книга должна быть сохранена в базе данных");
 
         Book bookInDb = DatabaseHelper.getRecordByField(entityManager, Book.class, "id", createBookResponse.getBookId());
         assertNotNull(bookInDb, "Книга должна быть сохранена в базе данных");
@@ -88,24 +95,29 @@ public class BookAssertions {
     public void verifyBookInDatabase(Long bookId, String expectedTitle, Long expectedAuthorId) {
         TypedQuery<Book> query = entityManager.createQuery("SELECT b FROM Book b WHERE b.id = :bookId", Book.class);
         query.setParameter("bookId", bookId);
-        Book book = query.getSingleResult();
+        Book book = null;
+        try {
+            book = query.getSingleResult();
+        } catch (NoResultException e) {
+            fail("Книга с ID " + bookId + " не найдена в базе данных");
+        }
 
         assertNotNull(book);
         assertEquals(expectedTitle, book.getBookTitle());
         assertEquals(expectedAuthorId, book.getAuthor_id());
     }
 
-    public void verifyBookNotInDatabase(Long bookId) {
-        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.id = :bookId", Long.class);
-        query.setParameter("bookId", bookId);
+    public void verifyBookNotInDatabase(String bookTitle) {
+        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.book_title = :bookTitle", Long.class);
+        query.setParameter("bookTitle", bookTitle);
         Long count = query.getSingleResult();
 
         assertEquals(0L, count);
     }
 
-    public void verifyNoBooksInDatabaseWithAuthorId(Long authorId) {
-        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.author_id = :authorId", Long.class);
-        query.setParameter("authorId", authorId);
+    public void verifyNoBooksInDatabaseWithAuthorId(Long author_Id) {
+        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.author_id = :author_Id", Long.class);
+        query.setParameter("author_Id", author_Id);
         Long count = query.getSingleResult();
 
         assertEquals(0L, count);

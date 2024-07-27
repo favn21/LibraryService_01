@@ -33,7 +33,6 @@ public class CreateBookTest extends BaseTest {
         CreateBookResponse response = bookSteps.createBook("Детство", 2L, 201);
         bookAssertions.verifyCreateBookResponse(response);
         bookAssertions.verifyBookInDatabase(response.getBookId(), "Детство", 2L);
-        bookRepository.clearBooks();
     }
 
     @Test
@@ -42,8 +41,7 @@ public class CreateBookTest extends BaseTest {
     public void testCreateBookWithoutTitle() {
         BaseResponse response = ErrorBookApiRequests.createBookWithError(3L, null, 400);
         bookAssertions.verifyFailedResponse(response, "1001", "Не передан обязательный параметр: bookTitle", "Не передано наименование книги");
-        bookAssertions.verifyBookNotInDatabase(3L);
-        bookRepository.clearBooks();
+        bookAssertions.verifyBookNotInDatabase(null);
     }
 
     @Test
@@ -52,8 +50,7 @@ public class CreateBookTest extends BaseTest {
     public void testCreateBookWithNonExistingAuthor() {
         BaseResponse response = ErrorBookApiRequests.createBookWithError(999L, "Детство", 409);
         bookAssertions.verifyFailedResponse(response, "1004", "Указанный автор не существует в таблице", null);
-        bookAssertions.verifyBookNotInDatabase(999L);
-        bookRepository.clearBooks();
+        bookAssertions.verifyNoBooksInDatabaseWithAuthorId(999L);
     }
 
     @Test
@@ -65,6 +62,5 @@ public class CreateBookTest extends BaseTest {
 
         List<Book> booksInDb = DatabaseHelper.getRecordsByField(Book.class, "bookTitle", "Детство");
         bookAssertions.bookListSize(1, booksInDb);
-        bookRepository.clearBooks();
     }
 }

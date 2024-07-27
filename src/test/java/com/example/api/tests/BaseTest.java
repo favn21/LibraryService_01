@@ -44,9 +44,11 @@ public abstract class BaseTest {
 
     @AfterEach
     public void tearDown() {
+        bookRepository.clearBooks();
         if (entityManager != null && entityManager.isOpen()) {
             entityManager.close();
         }
+
     }
 
     protected static String getBaseURI() {
