@@ -32,7 +32,8 @@ public class CreateBookTest extends BaseTest {
     public void testCreateBook() {
         CreateBookResponse response = bookSteps.createBook("Детство", 2L, 201);
         bookAssertions.verifyCreateBookResponse(response);
-        bookAssertions.verifyBookInDatabase(response.getBookId(), "Детство", 2L);
+        Long bookId = response.getBookId();
+        bookAssertions.verifyBookInDatabase(bookId, "Детство", 2L);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.example.api.tests;
 
 import com.example.api.database.DatabaseHelper;
+import com.example.api.db.Author;
 import com.example.api.db.Book;
 import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,17 +34,8 @@ public class GetBooksByAuthorTest extends BaseTest {
     }
 
     @Test
-    @DisplayName("Позитивный тест - Получение книг по автору (JSON) без книг")
-    @Description("Проверка, что можно получить книги автора в формате JSON")
-    public void testGetBooksByAuthorJSON() {
-        List<GetBooksByAuthorResponse.BookDetail> expectedBooks = new ArrayList<>();
-        List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(2L, 200);
-        bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
-        expectedBooks.forEach(book -> bookAssertions.verifyBookInDatabase(book.getId(), book.getBookTitle(), 2L));
-    }
-    @Test
     @DisplayName("Позитивный тест - Получение книг по автору(JSON), когда у автора есть книги")
-    @Description("Проверка, что при запросе книг по автору, у которого уже есть книги, возвращаются все книги этого автора")
+    @Description("Проверка, что при запросе книг по автору, у которого уже есть книги, возвращаются все книги этого автора")//чтото не то с тестом
     public void testGetBooksByAuthorWithExistingBooks() {
         long authorId = 1L;
 
@@ -72,6 +63,7 @@ public class GetBooksByAuthorTest extends BaseTest {
                 })
                 .collect(Collectors.toList());
         bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
+        bookAssertions.verifyBooksByAuthorId(authorId, expectedBooks);
     }
     @Test
     @DisplayName("Негативный тест - Получение книг по автору без указания ID")

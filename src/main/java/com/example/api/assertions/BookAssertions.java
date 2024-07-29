@@ -4,6 +4,7 @@ import com.example.api.database.DatabaseHelper;
 import com.example.api.db.Book;
 import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
+import com.example.api.models.response.GetBooksByAuthorResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse.BookDetail;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -32,7 +33,7 @@ public class BookAssertions {
     }
 
     public void verifyCreateBookResponse(CreateBookResponse createBookResponse) {
-        assertNotNull(createBookResponse);
+        assertNotNull(createBookResponse, "Ответ не должен быть null");
         assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
 
         TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.id = :bookId", Long.class);
@@ -41,9 +42,9 @@ public class BookAssertions {
 
         assertEquals(1L, count, "Книга должна быть сохранена в базе данных");
 
-        Book bookInDb = DatabaseHelper.getRecordByField(entityManager, Book.class, "id", createBookResponse.getBookId());
+        Book bookInDb = entityManager.find(Book.class, createBookResponse.getBookId());
         assertNotNull(bookInDb, "Книга должна быть сохранена в базе данных");
-        assertThat(bookInDb.getId(), is(createBookResponse.getBookId()));
+        assertEquals(createBookResponse.getBookId(), bookInDb.getId(), "ID книги должен совпадать с ожидаемым");
     }
 
 
@@ -102,9 +103,9 @@ public class BookAssertions {
             fail("Книга с ID " + bookId + " не найдена в базе данных");
         }
 
-        assertNotNull(book);
-        assertEquals(expectedTitle, book.getBookTitle());
-        assertEquals(expectedAuthorId, book.getAuthor_id());
+        assertNotNull(book, "Книга должна быть сохранена в базе данных");
+        assertEquals(expectedTitle, book.getBookTitle(), "Название книги должно совпадать с ожидаемым");
+        assertEquals(expectedAuthorId, book.getAuthor_id(), "ID автора должен совпадать с ожидаемым");
     }
 
     public void verifyBookNotInDatabase(String bookTitle) {
@@ -121,5 +122,20 @@ public class BookAssertions {
         Long count = query.getSingleResult();
 
         assertEquals(0L, count);
+    }
+    public void verifyBooksByAuthorId(Long authorId, List<GetBooksByAuthorResponse.BookDetail> expectedBooks) {
+        TypedQuery<Book> query = entityManager.createQuery("SELECT b FROM Book b WHERE b.authorId = :authorId", Book.class);
+        query.setParameter("authorId", authorId);
+        List<Book> books = query.getResultList();
+
+        assertEquals(expectedBooks.size(), books.size(), "Количество книг не соответствует ожидаемому");
+
+        for (GetBooksByAuthorResponse.BookDetail expectedBook : expectedBooks) {
+            boolean found = books.stream()
+                    .anyMatch(book -> book.getId() == expectedBook.getId() &&
+                            book.getBookTitle().equals(expectedBook.getBookTitle()) &&
+                            book.getAuthor_id().equals(authorId));
+            assertTrue(found, "Книга с ID " + expectedBook.getId() + " не найдена или не соответствует ожидаемой");
+        }
     }
 }

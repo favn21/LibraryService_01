@@ -12,18 +12,12 @@ import static io.restassured.RestAssured.given;
 
 public class RequestBuilder {
 
-    private static boolean filtersAdded = false;
-
     public static RequestSpecification requestSpec(String baseUrl) {
         RequestSpecBuilder builder = new RequestSpecBuilder()
                 .setBaseUri(baseUrl)
-                .setContentType(ContentType.JSON);
-
-        if (!filtersAdded) {
-            builder.addFilter(new RequestLoggingFilter());
-            builder.addFilter(new ResponseLoggingFilter());
-            filtersAdded = true;
-        }
+                .setContentType(ContentType.JSON)
+                .addFilter(new RequestLoggingFilter())
+                .addFilter(new ResponseLoggingFilter());
 
         return builder.build();
     }
