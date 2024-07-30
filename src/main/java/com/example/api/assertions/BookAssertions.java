@@ -33,7 +33,7 @@ public class BookAssertions {
     }
 
     public void verifyCreateBookResponse(CreateBookResponse createBookResponse) {
-        assertNotNull(createBookResponse, "Ответ не должен быть null");
+        assertNotNull(createBookResponse);
         assertThat(createBookResponse.getBookId(), is(greaterThan(0L)));
 
         TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.id = :bookId", Long.class);
@@ -42,9 +42,10 @@ public class BookAssertions {
 
         assertEquals(1L, count, "Книга должна быть сохранена в базе данных");
 
-        Book bookInDb = entityManager.find(Book.class, createBookResponse.getBookId());
+        Book bookInDb = DatabaseHelper.getRecordByField(entityManager, Book.class, "id", createBookResponse.getBookId());
         assertNotNull(bookInDb, "Книга должна быть сохранена в базе данных");
-        assertEquals(createBookResponse.getBookId(), bookInDb.getId(), "ID книги должен совпадать с ожидаемым");
+        assertThat(bookInDb.getId(), is(createBookResponse.getBookId()));
+        assertEquals(createBookResponse.getBookId(), bookInDb.getAuthor_id());
     }
 
 
@@ -122,20 +123,5 @@ public class BookAssertions {
         Long count = query.getSingleResult();
 
         assertEquals(0L, count);
-    }
-    public void verifyBooksByAuthorId(Long authorId, List<GetBooksByAuthorResponse.BookDetail> expectedBooks) {
-        TypedQuery<Book> query = entityManager.createQuery("SELECT b FROM Book b WHERE b.authorId = :authorId", Book.class);
-        query.setParameter("authorId", authorId);
-        List<Book> books = query.getResultList();
-
-        assertEquals(expectedBooks.size(), books.size(), "Количество книг не соответствует ожидаемому");
-
-        for (GetBooksByAuthorResponse.BookDetail expectedBook : expectedBooks) {
-            boolean found = books.stream()
-                    .anyMatch(book -> book.getId() == expectedBook.getId() &&
-                            book.getBookTitle().equals(expectedBook.getBookTitle()) &&
-                            book.getAuthor_id().equals(authorId));
-            assertTrue(found, "Книга с ID " + expectedBook.getId() + " не найдена или не соответствует ожидаемой");
-        }
     }
 }

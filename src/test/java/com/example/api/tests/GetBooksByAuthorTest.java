@@ -1,6 +1,5 @@
 package com.example.api.tests;
 
-import com.example.api.database.DatabaseHelper;
 import com.example.api.db.Author;
 import com.example.api.db.Book;
 import com.example.api.models.response.BaseResponse;
@@ -16,10 +15,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import javax.persistence.TypedQuery;
 import java.time.LocalDate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Fail.fail;
 
 
 @Epic("LibraryService")
@@ -32,18 +35,43 @@ public class GetBooksByAuthorTest extends BaseTest {
         super.setUp();
         bookAssertions = new BookAssertions(entityManager);
     }
+    @Test
+    @DisplayName("Позитивный тест - Получение книг по автору (JSON) без книг")
+    @Description("Проверка, что можно получить книги автора в формате JSON")//чтото не то с тестом
+    public void testGetBooksByAuthorJSON() {
+        long authorId = 2L;
+
+        Author author = new Author();
+        author.setId(authorId);
+        author.setFirstName("Имя");
+        author.setSecondName("Отчество");
+        author.setFamilyName("Фамилия");
+        author.setBirthDate(LocalDate.of(1980, 1, 1));
+
+        List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(authorId, 200);
+
+        List<GetBooksByAuthorResponse.BookDetail> expectedBooks = new ArrayList<>();
+        bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
+    }
 
     @Test
     @DisplayName("Позитивный тест - Получение книг по автору(JSON), когда у автора есть книги")
     @Description("Проверка, что при запросе книг по автору, у которого уже есть книги, возвращаются все книги этого автора")//чтото не то с тестом
-    public void testGetBooksByAuthorWithExistingBooks() {
+    public void testGetBooksByAuthorWithBooks() {
         long authorId = 1L;
 
-        bookRepository.insertBook("Книга 1", authorId);
-        bookRepository.insertBook("Книга 2", authorId);
+        try {
+            bookRepository.insertBook("Книга 1", authorId);
+            bookRepository.insertBook("Книга 2", authorId);
+        } catch (Exception e) {
+            fail("Failed to insert book: " + e.getMessage());
+        }
 
         List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(authorId, 200);
-        List<Book> booksInDb = DatabaseHelper.getRecordsByField(Book.class, "author_id", authorId);
+
+        TypedQuery<Book> query = entityManager.createQuery("SELECT b FROM Book b WHERE b.authorId = :authorId", Book.class);
+        query.setParameter("authorId", authorId);
+        List<Book> booksInDb = query.getResultList();
 
         List<GetBooksByAuthorResponse.BookDetail> expectedBooks = booksInDb.stream()
                 .map(book -> {
@@ -62,8 +90,8 @@ public class GetBooksByAuthorTest extends BaseTest {
                     return bookDetail;
                 })
                 .collect(Collectors.toList());
+
         bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
-        bookAssertions.verifyBooksByAuthorId(authorId, expectedBooks);
     }
     @Test
     @DisplayName("Негативный тест - Получение книг по автору без указания ID")
