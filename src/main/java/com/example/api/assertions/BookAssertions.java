@@ -4,7 +4,6 @@ import com.example.api.database.DatabaseHelper;
 import com.example.api.db.Book;
 import com.example.api.models.response.BaseResponse;
 import com.example.api.models.response.CreateBookResponse;
-import com.example.api.models.response.GetBooksByAuthorResponse;
 import com.example.api.models.response.GetBooksByAuthorResponse.BookDetail;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -45,21 +44,21 @@ public class BookAssertions {
         Book bookInDb = DatabaseHelper.getRecordByField(entityManager, Book.class, "id", createBookResponse.getBookId());
         assertNotNull(bookInDb, "Книга должна быть сохранена в базе данных");
         assertThat(bookInDb.getId(), is(createBookResponse.getBookId()));
-        assertEquals(createBookResponse.getBookId(), bookInDb.getAuthor_id());
+        assertEquals("Детство", bookInDb.getBookTitle(), "Название книги должно совпадать");
+        assertEquals(createBookResponse.getBookId(), bookInDb.getId(), "ID должно совпадать");
     }
 
-
     public void verifyGetBooksByAuthorResponse(List<BookDetail> actualBooks, List<BookDetail> expectedBooks) {
-        assertNotNull(actualBooks);
-        assertEquals(expectedBooks.size(), actualBooks.size());
+        assertNotNull(actualBooks,"Список книг не должен быть null");
+        assertEquals(expectedBooks.size(), actualBooks.size(), "Размер списков не совпадает");
 
         for (int i = 0; i < actualBooks.size(); i++) {
             BookDetail actualBook = actualBooks.get(i);
             BookDetail expectedBook = expectedBooks.get(i);
+            assertThat("ID книги не совпадает", actualBook.getId(), is(expectedBook.getId()));
+            assertThat("Название книги не совпадает", actualBook.getBookTitle(), is(expectedBook.getBookTitle()));
 
-            assertThat(actualBook.getId(), is(expectedBook.getId()));
-            assertThat(actualBook.getBookTitle(), is(expectedBook.getBookTitle()));
-            assertThat(actualBook.getAuthor(), allOf(
+            assertThat("Автор книги не совпадает", actualBook.getAuthor(), allOf(
                     notNullValue(),
                     hasProperty("id", is(expectedBook.getAuthor().getId())),
                     hasProperty("firstName", is(expectedBook.getAuthor().getFirstName())),
@@ -69,8 +68,8 @@ public class BookAssertions {
             ));
 
             Book bookInDb = DatabaseHelper.getRecordByField(entityManager, Book.class, "id", actualBook.getId());
-            assertNotNull(bookInDb, "Книга должна быть в базе данных");
-            assertThat(bookInDb.getBookTitle(), is(actualBook.getBookTitle()));
+            assertNotNull(bookInDb,"Книга должна быть в базе данных");
+            assertThat("Название книги в базе данных не совпадает", bookInDb.getBookTitle(), is(actualBook.getBookTitle()));
         }
     }
 
@@ -110,7 +109,7 @@ public class BookAssertions {
     }
 
     public void verifyBookNotInDatabase(String bookTitle) {
-        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.book_title = :bookTitle", Long.class);
+        TypedQuery<Long> query = entityManager.createQuery("SELECT COUNT(b) FROM Book b WHERE b.bookTitle = :bookTitle ", Long.class);
         query.setParameter("bookTitle", bookTitle);
         Long count = query.getSingleResult();
 

@@ -5,6 +5,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 public class DatabaseHelper {
@@ -32,11 +33,11 @@ public class DatabaseHelper {
         }
     }
 
-    public static <T> T getRecordByField(EntityManager entityManager, Class<T> entityClass, String fieldName, Object value) {
-        String query = "SELECT e FROM " + entityClass.getSimpleName() + " e WHERE e." + fieldName + " = :value";
-        return entityManager.createQuery(query, entityClass)
-                .setParameter("value", value)
-                .getSingleResult();
+    public static <T> T getRecordByField(EntityManager entityManager, Class<T> entityClass, String fieldName, Object fieldValue) {
+        TypedQuery<T> query = entityManager.createQuery(
+                "SELECT e FROM " + entityClass.getSimpleName() + " e WHERE e." + fieldName + " = :fieldValue", entityClass);
+        query.setParameter("fieldValue", fieldValue);
+        return query.getSingleResult();
     }
 
 }

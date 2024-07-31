@@ -58,6 +58,13 @@ public class BookRepository {
             throw new RuntimeException("Failed to insert book.", e);
         }
     }
+    public Long bookInsert(String title, Long authorId) {
+        Book book = new Book();
+        book.setBookTitle(title);
+        book.setAuthor_id(authorId);
+        entityManager.persist(book);
+        return book.getId();
+    }
 
     public Book findBookByTitle(String bookTitle) {
         return entityManager.createQuery("SELECT b FROM Book b WHERE b.bookTitle = :bookTitle", Book.class)

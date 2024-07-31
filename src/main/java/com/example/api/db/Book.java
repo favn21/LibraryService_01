@@ -8,7 +8,7 @@ import java.time.OffsetDateTime;
 
 @Data
 @Entity
-@Table(name = "books")
+@Table(name = "book")
 public class Book implements Serializable {
 
     @Id

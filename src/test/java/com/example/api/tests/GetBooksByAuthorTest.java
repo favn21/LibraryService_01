@@ -37,7 +37,7 @@ public class GetBooksByAuthorTest extends BaseTest {
     }
     @Test
     @DisplayName("Позитивный тест - Получение книг по автору (JSON) без книг")
-    @Description("Проверка, что можно получить книги автора в формате JSON")//чтото не то с тестом
+    @Description("Проверка, что можно получить книги автора в формате JSON")
     public void testGetBooksByAuthorJSON() {
         long authorId = 2L;
 
@@ -56,22 +56,28 @@ public class GetBooksByAuthorTest extends BaseTest {
 
     @Test
     @DisplayName("Позитивный тест - Получение книг по автору(JSON), когда у автора есть книги")
-    @Description("Проверка, что при запросе книг по автору, у которого уже есть книги, возвращаются все книги этого автора")//чтото не то с тестом
+    @Description("Проверка, что при запросе книг по автору, у которого уже есть книги, возвращаются все книги этого автора")
     public void testGetBooksByAuthorWithBooks() {
         long authorId = 1L;
 
+        Long book1Id = null;
+        Long book2Id = null;
+
         try {
-            bookRepository.insertBook("Книга 1", authorId);
-            bookRepository.insertBook("Книга 2", authorId);
+            bookRepository.bookInsert("Книга 1", authorId);
+            bookRepository.bookInsert("Книга 2", authorId);
+            System.out.println("Inserted Book IDs: " + book1Id + ", " + book2Id);
         } catch (Exception e) {
             fail("Failed to insert book: " + e.getMessage());
         }
 
         List<GetBooksByAuthorResponse.BookDetail> response = BookApiRequests.getBooksByAuthor(authorId, 200);
 
-        TypedQuery<Book> query = entityManager.createQuery("SELECT b FROM Book b WHERE b.authorId = :authorId", Book.class);
+        TypedQuery<Book> query = entityManager.createQuery("SELECT b FROM Book b WHERE b.author_id = :authorId", Book.class);
         query.setParameter("authorId", authorId);
         List<Book> booksInDb = query.getResultList();
+
+        System.out.println("Books in DB: " + booksInDb);
 
         List<GetBooksByAuthorResponse.BookDetail> expectedBooks = booksInDb.stream()
                 .map(book -> {
@@ -90,6 +96,9 @@ public class GetBooksByAuthorTest extends BaseTest {
                     return bookDetail;
                 })
                 .collect(Collectors.toList());
+
+        System.out.println("Expected Books: " + expectedBooks);
+        System.out.println("Actual Books: " + response);
 
         bookAssertions.verifyGetBooksByAuthorResponse(response, expectedBooks);
     }
